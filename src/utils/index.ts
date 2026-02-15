@@ -20,3 +20,5 @@ export {
 export {fetchWithRetry} from './retry';
 
 export {getStorageItem, setStorageItem, removeStorageItem} from './storage';
+
+export {getSquareImageUrl} from './image';

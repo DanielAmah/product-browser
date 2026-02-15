@@ -84,7 +84,25 @@ describe('currency utilities', () => {
       expect(isOnSale(compareAt)).toBe(false);
     });
 
-    it('returns true for positive compareAtPrice', () => {
+    it('returns true when compareAtPrice is higher than currentPrice', () => {
+      const compareAt: Money = {amount: '45.00', currencyCode: 'CAD'};
+      const current: Money = {amount: '28.52', currencyCode: 'CAD'};
+      expect(isOnSale(compareAt, current)).toBe(true);
+    });
+
+    it('returns false when compareAtPrice equals currentPrice', () => {
+      const compareAt: Money = {amount: '50.00', currencyCode: 'CAD'};
+      const current: Money = {amount: '50.00', currencyCode: 'CAD'};
+      expect(isOnSale(compareAt, current)).toBe(false);
+    });
+
+    it('returns false when compareAtPrice is lower than currentPrice', () => {
+      const compareAt: Money = {amount: '20.00', currencyCode: 'CAD'};
+      const current: Money = {amount: '50.00', currencyCode: 'CAD'};
+      expect(isOnSale(compareAt, current)).toBe(false);
+    });
+
+    it('returns true for positive compareAtPrice without currentPrice', () => {
       const compareAt: Money = {amount: '45.00', currencyCode: 'CAD'};
       expect(isOnSale(compareAt)).toBe(true);
     });

@@ -7,8 +7,11 @@ module.exports = {
       '@react-navigation|' +
       'react-native-safe-area-context|' +
       'react-native-screens|' +
+      'react-native-svg|' +
       '@react-native-community/netinfo|' +
-      '@react-native-async-storage/async-storage' +
+      '@react-native-async-storage/async-storage|' +
+      '@shopify/flash-list|' +
+      'lucide-react-native' +
     ')/)',
   ],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],

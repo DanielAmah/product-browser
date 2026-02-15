@@ -13,14 +13,9 @@ import {getStorageItem, setStorageItem} from '@utils/storage';
 import {API_CONFIG} from './config';
 
 /**
- * API Response shape from the JSON feed
- */
-interface ProductsApiResponse {
-  products: Product[];
-}
-
-/**
  * Fetch products from the API
+ *
+ * The JSON feed returns a top-level array of Product objects.
  *
  * @throws NetworkError on failure
  */
@@ -30,8 +25,8 @@ export async function fetchProducts(): Promise<Product[]> {
     maxRetries: API_CONFIG.MAX_RETRIES,
   });
 
-  const data: ProductsApiResponse = await response.json();
-  return data.products;
+  const data: Product[] = await response.json();
+  return data;
 }
 
 /**

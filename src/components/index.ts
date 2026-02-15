@@ -12,3 +12,8 @@ export {PriceDisplay} from './PriceDisplay';
 export {VariantSelector} from './VariantSelector';
 export {ImageCarousel} from './ImageCarousel';
 export {ErrorBoundary} from './ErrorBoundary';
+export {ProductCard, PRODUCT_CARD_WIDTH} from './ProductCard';
+export {CartLineItem} from './CartLineItem';
+export {CartSummary} from './CartSummary';
+export {AddToCartButton} from './AddToCartButton';
+export {ProductInfo} from './ProductInfo';

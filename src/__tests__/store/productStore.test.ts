@@ -35,8 +35,20 @@ const sampleProduct: Product = {
   id: 'p1',
   title: 'Test Product',
   description: 'A test product description',
+  descriptionHtml: '<p>A test product description</p>',
+  availableForSale: true,
+  handle: 'test-product',
   vendor: 'Test Vendor',
   productType: 'Test Type',
+  tags: ['test'],
+  priceRange: {
+    minVariantPrice: {amount: '28.96', currencyCode: 'CAD'},
+    maxVariantPrice: {amount: '28.96', currencyCode: 'CAD'},
+  },
+  compareAtPriceRange: {
+    minVariantPrice: {amount: '0.00', currencyCode: 'CAD'},
+    maxVariantPrice: {amount: '0.00', currencyCode: 'CAD'},
+  },
   options: [{id: 'opt1', name: 'Size', values: ['S', 'M', 'L']}],
   variants: [
     {
@@ -53,7 +65,9 @@ const sampleProduct: Product = {
     },
   ],
   images: [{id: 'img1', url: 'https://example.com/image.jpg'}],
-  featuredImage: {id: 'img1', url: 'https://example.com/image.jpg'},
+  media: [],
+  collections: [],
+  onlineStoreUrl: 'https://example.com/products/test-product',
 };
 
 // Reset store before each test

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import {View, Text, StyleSheet, Pressable} from 'react-native';
-import {colors, spacing, layout, textStyles} from '@theme';
+import {Trash2, Minus, Plus} from 'lucide-react-native';
+import {colors, layout, textStyles} from '@theme';
 
 interface QuantityStepperProps {
   quantity: number;
@@ -36,7 +37,11 @@ export const QuantityStepper = React.memo<QuantityStepperProps>(
               ? 'Removes this item from your cart'
               : 'Decreases quantity by one'
           }>
-          <Text style={styles.buttonText}>{isRemoveAction ? '🗑️' : '−'}</Text>
+          {isRemoveAction ? (
+            <Trash2 size={16} color={colors.error} strokeWidth={2} />
+          ) : (
+            <Minus size={16} color={colors.textPrimary} strokeWidth={2} />
+          )}
         </Pressable>
 
         <View
@@ -54,7 +59,7 @@ export const QuantityStepper = React.memo<QuantityStepperProps>(
           accessibilityRole="button"
           accessibilityLabel="Increase quantity"
           accessibilityHint="Increases quantity by one">
-          <Text style={styles.buttonText}>+</Text>
+          <Plus size={16} color={colors.textPrimary} strokeWidth={2} />
         </Pressable>
       </View>
     );

@@ -17,3 +17,5 @@ export {
   lineHeight,
   textStyles,
 } from './typography';
+
+export {responsive, isTablet} from './responsive';

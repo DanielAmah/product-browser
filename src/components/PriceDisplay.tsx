@@ -7,8 +7,8 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import type {Money} from '@apptypes/product';
-import {formatPrice, formatPriceForVoiceOver, isOnSale} from '@utils/currency';
-import {colors, spacing, textStyles} from '@theme';
+import {formatPrice, formatPriceForVoiceOver, isOnSale, calculateDiscountPercentage} from '@utils/currency';
+import {colors, spacing, textStyles, responsive} from '@theme';
 
 interface PriceDisplayProps {
   price: Money;
@@ -21,11 +21,14 @@ export function PriceDisplay({
   compareAtPrice,
   size = 'default',
 }: PriceDisplayProps) {
-  const onSale = isOnSale(compareAtPrice);
+  const onSale = isOnSale(compareAtPrice, price);
 
   // Build accessibility label
+  const discountPct = onSale
+    ? calculateDiscountPercentage(compareAtPrice!, price)
+    : 0;
   const accessibilityLabel = onSale
-    ? `On sale: ${formatPriceForVoiceOver(price)}, was ${formatPriceForVoiceOver(compareAtPrice!)}`
+    ? `Save ${discountPct}%: ${formatPriceForVoiceOver(price)}, was ${formatPriceForVoiceOver(compareAtPrice!)}`
     : formatPriceForVoiceOver(price);
 
   return (
@@ -53,10 +56,12 @@ const styles = StyleSheet.create({
   },
   price: {
     ...textStyles.price,
+    fontSize: responsive(16, 20),
     color: colors.textPrimary,
   },
   priceLarge: {
     ...textStyles.priceLarge,
+    fontSize: responsive(22, 28),
     color: colors.textPrimary,
   },
   salePrice: {
@@ -64,6 +69,7 @@ const styles = StyleSheet.create({
   },
   compareAtPrice: {
     ...textStyles.priceStrikethrough,
+    fontSize: responsive(13, 16),
     color: colors.textTertiary,
   },
 });

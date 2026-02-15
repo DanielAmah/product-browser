@@ -48,15 +48,26 @@ export function formatPriceForVoiceOver(money: Money): string {
 }
 
 /**
- * Check if a compareAtPrice indicates a sale.
- * Returns false if compareAtPrice is null or "0.0" or "0".
+ * Check if a compareAtPrice indicates a genuine sale.
+ * Returns true only when compareAtPrice is present, non-zero,
+ * and strictly greater than the current price.
  */
-export function isOnSale(compareAtPrice: Money | null): boolean {
+export function isOnSale(
+  compareAtPrice: Money | null,
+  currentPrice?: Money,
+): boolean {
   if (!compareAtPrice) {
     return false;
   }
-  const amount = parseMoney(compareAtPrice);
-  return amount > 0;
+  const compareAmount = parseMoney(compareAtPrice);
+  if (compareAmount <= 0) {
+    return false;
+  }
+  // When a current price is provided, only flag as sale if there's an actual discount
+  if (currentPrice) {
+    return compareAmount > parseMoney(currentPrice);
+  }
+  return true;
 }
 
 /**

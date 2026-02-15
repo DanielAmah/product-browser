@@ -5,10 +5,10 @@
  * Supports multiple option axes (Color, Size, etc.).
  */
 
-import React, {useCallback} from 'react';
-import {View, Text, StyleSheet, Pressable, ScrollView} from 'react-native';
+import React, {useCallback, useRef} from 'react';
+import {View, Text, StyleSheet, Pressable} from 'react-native';
 import type {ProductOption} from '@apptypes/product';
-import {colors, spacing, layout, textStyles} from '@theme';
+import {colors, spacing} from '@theme';
 
 interface VariantSelectorProps {
   options: ProductOption[];
@@ -18,14 +18,28 @@ interface VariantSelectorProps {
 }
 
 interface OptionPillProps {
+  optionName: string;
   value: string;
   isSelected: boolean;
   isAvailable: boolean;
-  onPress: () => void;
+  onSelectOption: (optionName: string, value: string) => void;
 }
 
+const DEBOUNCE_MS = 300;
+
 const OptionPill = React.memo<OptionPillProps>(
-  ({value, isSelected, isAvailable, onPress}) => {
+  ({optionName, value, isSelected, isAvailable, onSelectOption}) => {
+    const lastPress = useRef(0);
+
+    const handlePress = useCallback(() => {
+      const now = Date.now();
+      if (now - lastPress.current < DEBOUNCE_MS) {
+        return;
+      }
+      lastPress.current = now;
+      onSelectOption(optionName, value);
+    }, [onSelectOption, optionName, value]);
+
     return (
       <Pressable
         style={({pressed}) => [
@@ -34,7 +48,7 @@ const OptionPill = React.memo<OptionPillProps>(
           !isAvailable && styles.pillUnavailable,
           pressed && styles.pillPressed,
         ]}
-        onPress={onPress}
+        onPress={handlePress}
         disabled={!isAvailable}
         accessibilityRole="radio"
         accessibilityState={{
@@ -64,10 +78,8 @@ export const VariantSelector = React.memo<VariantSelectorProps>(
         {options.map(option => (
           <View key={option.id} style={styles.optionGroup}>
             <Text style={styles.optionLabel}>{option.name}</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.pillsContainer}
+            <View
+              style={styles.pillsContainer}
               accessibilityRole="radiogroup"
               accessibilityLabel={`${option.name} options`}>
               {option.values.map(value => {
@@ -78,14 +90,15 @@ export const VariantSelector = React.memo<VariantSelectorProps>(
                 return (
                   <OptionPill
                     key={value}
+                    optionName={option.name}
                     value={value}
                     isSelected={isSelected}
                     isAvailable={isAvailable}
-                    onPress={() => onSelectOption(option.name, value)}
+                    onSelectOption={onSelectOption}
                   />
                 );
               })}
-            </ScrollView>
+            </View>
           </View>
         ))}
       </View>
@@ -97,25 +110,28 @@ VariantSelector.displayName = 'VariantSelector';
 
 const styles = StyleSheet.create({
   container: {
-    gap: spacing.lg,
+    gap: spacing.xl,
   },
   optionGroup: {
     gap: spacing.sm,
   },
   optionLabel: {
-    ...textStyles.label,
+    fontSize: 14,
+    fontWeight: '600',
     color: colors.textPrimary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   pillsContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.sm,
-    paddingRight: spacing.lg,
   },
   pill: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    borderRadius: layout.pillRadius,
-    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    borderWidth: 1.5,
     borderColor: colors.border,
     backgroundColor: colors.surface,
   },
@@ -131,7 +147,8 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   pillText: {
-    ...textStyles.buttonSmall,
+    fontSize: 14,
+    fontWeight: '500',
     color: colors.textPrimary,
   },
   pillTextSelected: {
@@ -139,5 +156,6 @@ const styles = StyleSheet.create({
   },
   pillTextUnavailable: {
     color: colors.textDisabled,
+    textDecorationLine: 'line-through',
   },
 });

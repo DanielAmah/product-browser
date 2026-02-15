@@ -1,45 +1,111 @@
 /**
  * LoadingSkeleton Component
  *
- * Displays placeholder cards while loading.
+ * Displays animated placeholder cards that mirror the ProductCard layout.
+ * Uses a pulsing opacity animation to indicate content is loading.
  */
 
-import React from 'react';
-import {View, StyleSheet, Dimensions} from 'react-native';
-import {colors, spacing, layout} from '@theme';
+import React, {useEffect, useRef} from 'react';
+import {View, Animated, StyleSheet, Dimensions} from 'react-native';
+import {colors, spacing} from '@theme';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
-const CARD_GAP = spacing.sm;
-const CARD_WIDTH = (SCREEN_WIDTH - spacing.lg * 2 - CARD_GAP) / 2;
+const CARD_GAP = 12;
+const HORIZONTAL_PADDING = 16;
+const CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
 
-function SkeletonCard() {
+/** Number of skeleton rows to display */
+const SKELETON_ROWS = 3;
+
+/** Reusable animated bone shape */
+function Bone({
+  width,
+  height,
+  style,
+  pulseAnim,
+}: {
+  width: number | `${number}%`;
+  height: number;
+  style?: object;
+  pulseAnim: Animated.Value;
+}) {
+  return (
+    <Animated.View
+      style={[
+        styles.bone,
+        {width, height, opacity: pulseAnim},
+        style,
+      ]}
+    />
+  );
+}
+
+/** Single skeleton card matching ProductCard layout */
+function SkeletonCard({pulseAnim}: {pulseAnim: Animated.Value}) {
   return (
     <View style={styles.card}>
-      <View style={styles.image} />
+      {/* Square image placeholder */}
+      <Animated.View style={[styles.image, {opacity: pulseAnim}]} />
+
+      {/* Text placeholders */}
       <View style={styles.content}>
-        <View style={styles.vendorLine} />
-        <View style={styles.titleLine} />
-        <View style={styles.titleLineShort} />
-        <View style={styles.priceLine} />
+        <Bone width="40%" height={8} pulseAnim={pulseAnim} />
+        <Bone
+          width="90%"
+          height={12}
+          pulseAnim={pulseAnim}
+          style={styles.titleGap}
+        />
+        <Bone
+          width="60%"
+          height={12}
+          pulseAnim={pulseAnim}
+          style={styles.titleGap}
+        />
+        <Bone
+          width="45%"
+          height={12}
+          pulseAnim={pulseAnim}
+          style={styles.priceGap}
+        />
       </View>
     </View>
   );
 }
 
 export function LoadingSkeleton() {
+  const pulseAnim = useRef(new Animated.Value(0.4)).current;
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.4,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [pulseAnim]);
+
   return (
     <View
       style={styles.container}
       accessibilityRole="progressbar"
       accessibilityLabel="Loading products">
-      <View style={styles.row}>
-        <SkeletonCard />
-        <SkeletonCard />
-      </View>
-      <View style={styles.row}>
-        <SkeletonCard />
-        <SkeletonCard />
-      </View>
+      {Array.from({length: SKELETON_ROWS}).map((_, i) => (
+        <View key={i} style={styles.row}>
+          <SkeletonCard pulseAnim={pulseAnim} />
+          <SkeletonCard pulseAnim={pulseAnim} />
+        </View>
+      ))}
     </View>
   );
 }
@@ -47,8 +113,8 @@ export function LoadingSkeleton() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
+    paddingHorizontal: HORIZONTAL_PADDING,
+    paddingTop: spacing.md,
   },
   row: {
     flexDirection: 'row',
@@ -57,43 +123,24 @@ const styles = StyleSheet.create({
   },
   card: {
     width: CARD_WIDTH,
-    backgroundColor: colors.surface,
-    borderRadius: layout.cardRadius,
-    overflow: 'hidden',
   },
   image: {
     width: '100%',
-    height: layout.cardImageHeight,
+    aspectRatio: 1,
+    borderRadius: 12,
     backgroundColor: colors.skeleton,
   },
   content: {
-    padding: spacing.sm,
+    paddingTop: 10,
   },
-  vendorLine: {
-    width: '40%',
-    height: 10,
+  bone: {
     backgroundColor: colors.skeleton,
     borderRadius: 4,
-    marginBottom: spacing.xs,
   },
-  titleLine: {
-    width: '100%',
-    height: 14,
-    backgroundColor: colors.skeleton,
-    borderRadius: 4,
-    marginBottom: spacing.xxs,
+  titleGap: {
+    marginTop: 6,
   },
-  titleLineShort: {
-    width: '60%',
-    height: 14,
-    backgroundColor: colors.skeleton,
-    borderRadius: 4,
-    marginBottom: spacing.sm,
-  },
-  priceLine: {
-    width: '50%',
-    height: 14,
-    backgroundColor: colors.skeleton,
-    borderRadius: 4,
+  priceGap: {
+    marginTop: 8,
   },
 });

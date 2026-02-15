@@ -14,6 +14,20 @@ import {
 } from '../../store/cartStore';
 import type {CartItemInput} from '../../types/cart';
 
+/** Helper to build a valid CartItemInput */
+function makeInput(overrides: Partial<CartItemInput> = {}): CartItemInput {
+  return {
+    variantId: 'v1',
+    productId: 'p1',
+    productTitle: 'Test Product',
+    variantTitle: 'Size S',
+    price: {amount: '28.96', currencyCode: 'CAD'},
+    image: {id: 'img1', url: 'https://example.com/image.jpg'},
+    selectedOptions: [{name: 'Size', value: 'S'}],
+    ...overrides,
+  };
+}
+
 // Reset store before each test
 beforeEach(() => {
   useCartStore.setState({items: []});
@@ -22,14 +36,7 @@ beforeEach(() => {
 describe('cartStore', () => {
   describe('addItem', () => {
     it('adds a new item to the cart with quantity 1', () => {
-      const input: CartItemInput = {
-        variantId: 'v1',
-        productId: 'p1',
-        title: 'Test Product',
-        variantTitle: 'Size S',
-        price: {amount: '28.96', currencyCode: 'CAD'},
-        image: {id: 'img1', url: 'https://example.com/image.jpg'},
-      };
+      const input = makeInput();
 
       act(() => {
         useCartStore.getState().addItem(input);
@@ -42,14 +49,7 @@ describe('cartStore', () => {
     });
 
     it('increments quantity for existing item', () => {
-      const input: CartItemInput = {
-        variantId: 'v1',
-        productId: 'p1',
-        title: 'Test Product',
-        variantTitle: 'Size S',
-        price: {amount: '28.96', currencyCode: 'CAD'},
-        image: {id: 'img1', url: 'https://example.com/image.jpg'},
-      };
+      const input = makeInput();
 
       act(() => {
         useCartStore.getState().addItem(input);
@@ -62,23 +62,15 @@ describe('cartStore', () => {
     });
 
     it('adds multiple different items', () => {
-      const input1: CartItemInput = {
-        variantId: 'v1',
-        productId: 'p1',
-        title: 'Product 1',
-        variantTitle: 'Size S',
-        price: {amount: '28.96', currencyCode: 'CAD'},
-        image: null,
-      };
-
-      const input2: CartItemInput = {
+      const input1 = makeInput({variantId: 'v1', productId: 'p1'});
+      const input2 = makeInput({
         variantId: 'v2',
         productId: 'p2',
-        title: 'Product 2',
+        productTitle: 'Product 2',
         variantTitle: 'Size M',
         price: {amount: '45.00', currencyCode: 'CAD'},
-        image: null,
-      };
+        selectedOptions: [{name: 'Size', value: 'M'}],
+      });
 
       act(() => {
         useCartStore.getState().addItem(input1);
@@ -92,14 +84,7 @@ describe('cartStore', () => {
 
   describe('removeItem', () => {
     it('removes an item from the cart', () => {
-      const input: CartItemInput = {
-        variantId: 'v1',
-        productId: 'p1',
-        title: 'Test Product',
-        variantTitle: 'Size S',
-        price: {amount: '28.96', currencyCode: 'CAD'},
-        image: null,
-      };
+      const input = makeInput();
 
       act(() => {
         useCartStore.getState().addItem(input);
@@ -122,14 +107,7 @@ describe('cartStore', () => {
 
   describe('updateQuantity', () => {
     it('increases quantity by delta', () => {
-      const input: CartItemInput = {
-        variantId: 'v1',
-        productId: 'p1',
-        title: 'Test Product',
-        variantTitle: 'Size S',
-        price: {amount: '28.96', currencyCode: 'CAD'},
-        image: null,
-      };
+      const input = makeInput();
 
       act(() => {
         useCartStore.getState().addItem(input);
@@ -141,14 +119,7 @@ describe('cartStore', () => {
     });
 
     it('decreases quantity by delta', () => {
-      const input: CartItemInput = {
-        variantId: 'v1',
-        productId: 'p1',
-        title: 'Test Product',
-        variantTitle: 'Size S',
-        price: {amount: '28.96', currencyCode: 'CAD'},
-        image: null,
-      };
+      const input = makeInput();
 
       act(() => {
         // Add 3 times to get quantity=3
@@ -163,14 +134,7 @@ describe('cartStore', () => {
     });
 
     it('removes item when quantity reaches zero', () => {
-      const input: CartItemInput = {
-        variantId: 'v1',
-        productId: 'p1',
-        title: 'Test Product',
-        variantTitle: 'Size S',
-        price: {amount: '28.96', currencyCode: 'CAD'},
-        image: null,
-      };
+      const input = makeInput();
 
       act(() => {
         useCartStore.getState().addItem(input);
@@ -182,14 +146,7 @@ describe('cartStore', () => {
     });
 
     it('removes item when quantity goes negative', () => {
-      const input: CartItemInput = {
-        variantId: 'v1',
-        productId: 'p1',
-        title: 'Test Product',
-        variantTitle: 'Size S',
-        price: {amount: '28.96', currencyCode: 'CAD'},
-        image: null,
-      };
+      const input = makeInput();
 
       act(() => {
         useCartStore.getState().addItem(input);
@@ -203,23 +160,15 @@ describe('cartStore', () => {
 
   describe('clearCart', () => {
     it('removes all items from cart', () => {
-      const input1: CartItemInput = {
-        variantId: 'v1',
-        productId: 'p1',
-        title: 'Product 1',
-        variantTitle: 'Size S',
-        price: {amount: '28.96', currencyCode: 'CAD'},
-        image: null,
-      };
-
-      const input2: CartItemInput = {
+      const input1 = makeInput({variantId: 'v1', productId: 'p1'});
+      const input2 = makeInput({
         variantId: 'v2',
         productId: 'p2',
-        title: 'Product 2',
+        productTitle: 'Product 2',
         variantTitle: 'Size M',
         price: {amount: '45.00', currencyCode: 'CAD'},
-        image: null,
-      };
+        selectedOptions: [{name: 'Size', value: 'M'}],
+      });
 
       act(() => {
         useCartStore.getState().addItem(input1);
@@ -235,23 +184,19 @@ describe('cartStore', () => {
   describe('selectors', () => {
     describe('selectSubtotal', () => {
       it('calculates subtotal correctly', () => {
-        const input1: CartItemInput = {
+        const input1 = makeInput({
           variantId: 'v1',
           productId: 'p1',
-          title: 'Product 1',
-          variantTitle: 'Size S',
           price: {amount: '10.00', currencyCode: 'CAD'},
-          image: null,
-        };
-
-        const input2: CartItemInput = {
+        });
+        const input2 = makeInput({
           variantId: 'v2',
           productId: 'p2',
-          title: 'Product 2',
+          productTitle: 'Product 2',
           variantTitle: 'Size M',
           price: {amount: '25.00', currencyCode: 'CAD'},
-          image: null,
-        };
+          selectedOptions: [{name: 'Size', value: 'M'}],
+        });
 
         act(() => {
           // Add item1 twice (qty=2) and item2 once (qty=1)
@@ -274,23 +219,19 @@ describe('cartStore', () => {
 
     describe('selectTotalItems', () => {
       it('counts total items correctly', () => {
-        const input1: CartItemInput = {
+        const input1 = makeInput({
           variantId: 'v1',
           productId: 'p1',
-          title: 'Product 1',
-          variantTitle: 'Size S',
           price: {amount: '10.00', currencyCode: 'CAD'},
-          image: null,
-        };
-
-        const input2: CartItemInput = {
+        });
+        const input2 = makeInput({
           variantId: 'v2',
           productId: 'p2',
-          title: 'Product 2',
+          productTitle: 'Product 2',
           variantTitle: 'Size M',
           price: {amount: '25.00', currencyCode: 'CAD'},
-          image: null,
-        };
+          selectedOptions: [{name: 'Size', value: 'M'}],
+        });
 
         act(() => {
           // Add item1 twice (qty=2) and item2 three times (qty=3)
@@ -315,14 +256,7 @@ describe('cartStore', () => {
 
     describe('selectCartItemByVariant', () => {
       it('finds item by variant id', () => {
-        const input: CartItemInput = {
-          variantId: 'v1',
-          productId: 'p1',
-          title: 'Test Product',
-          variantTitle: 'Size S',
-          price: {amount: '28.96', currencyCode: 'CAD'},
-          image: null,
-        };
+        const input = makeInput();
 
         act(() => {
           useCartStore.getState().addItem(input);

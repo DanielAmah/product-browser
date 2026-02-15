@@ -30,5 +30,22 @@ target 'ProductBrowser' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Ensure NetworkExtension framework is linked for @react-native-community/netinfo
+    installer.aggregate_targets.each do |aggregate_target|
+      aggregate_target.user_project.native_targets.each do |native_target|
+        if native_target.name == 'ProductBrowser'
+          native_target.build_configurations.each do |config|
+            flags = config.build_settings['OTHER_LDFLAGS'] || ['$(inherited)']
+            flags = [flags] if flags.is_a?(String)
+            unless flags.any? { |f| f.include?('NetworkExtension') }
+              flags.push('-framework', '"NetworkExtension"')
+              config.build_settings['OTHER_LDFLAGS'] = flags
+            end
+          end
+          aggregate_target.user_project.save
+        end
+      end
+    end
   end
 end

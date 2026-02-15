@@ -54,7 +54,7 @@ export const createProductStore = () =>
     hydrateFromCache: async () => {
       try {
         const cached = await readProductsCache();
-        if (cached) {
+        if (cached && Array.isArray(cached.data) && cached.data.length > 0) {
           set({
             products: cached.data,
             lastFetched: cached.timestamp,
@@ -90,8 +90,9 @@ export const createProductStore = () =>
 
         try {
           const products = await apiFetchProducts();
+          const validProducts = Array.isArray(products) ? products : [];
           set({
-            products,
+            products: validProducts,
             fetchState: 'success',
             lastFetched: Date.now(),
           });

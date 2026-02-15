@@ -14,38 +14,48 @@ A React Native mobile application for browsing products and managing a shopping 
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Presentation Layer                        │
+│                     Screens (Thin Orchestrators)                  │
 │  ┌─────────────┐  ┌─────────────────┐  ┌─────────────────────┐  │
 │  │ProductList  │  │ProductDetail    │  │CartScreen           │  │
 │  │Screen       │  │Screen           │  │                     │  │
 │  └──────┬──────┘  └────────┬────────┘  └──────────┬──────────┘  │
-│         │                  │                      │              │
-│         │    ┌─────────────┴─────────────┐       │              │
-│         │    │  Shared Components        │       │              │
-│         │    │  VariantSelector, Badge,  │       │              │
-│         │    │  QuantityStepper, etc.    │       │              │
-│         │    └───────────────────────────┘       │              │
-└─────────┼────────────────────────────────────────┼──────────────┘
-          │                                        │
-┌─────────┴────────────────────────────────────────┴──────────────┐
-│                         State Layer (Zustand)                    │
-│  ┌──────────────────────┐       ┌──────────────────────────┐    │
-│  │  useProductStore     │       │  useCartStore            │    │
-│  │  - products[]        │       │  - items[]               │    │
-│  │  - fetchState        │       │  - addItem()             │    │
-│  │  - fetchProducts()   │       │  - updateQuantity()      │    │
-│  │  - hydrateFromCache()│       │  - persist middleware    │    │
-│  └──────────┬───────────┘       └──────────────────────────┘    │
-└─────────────┼───────────────────────────────────────────────────┘
+└─────────┼──────────────────┼───────────────────────┼─────────────┘
+          │                  │                       │
+┌─────────┴──────────────────┴───────────────────────┴─────────────┐
+│                    Custom Hooks (Logic Layer)                      │
+│  ┌──────────────┐  ┌───────────────────┐  ┌──────────────────┐   │
+│  │ useProducts  │  │useVariantSelection│  │ useCart           │   │
+│  │ useAddToCart  │  │useNetworkStatus   │  │                  │   │
+│  └──────┬───────┘  └────────┬──────────┘  └──────┬───────────┘   │
+└─────────┼──────────────────┼──────────────────────┼──────────────┘
+          │                  │                      │
+┌─────────┴──────────────────┴──────────────────────┴──────────────┐
+│                    Shared Components (Pure UI)                     │
+│  ProductCard, CartLineItem, CartSummary, ProductInfo,             │
+│  AddToCartButton, VariantSelector, QuantityStepper,               │
+│  ImageCarousel, Badge, PriceDisplay, EmptyState, ErrorState,      │
+│  LoadingSkeleton, OfflineBanner, ErrorBoundary                    │
+└──────────────────────────────┬───────────────────────────────────┘
+                               │
+┌──────────────────────────────┴───────────────────────────────────┐
+│                      State Layer (Zustand)                        │
+│  ┌──────────────────────┐       ┌──────────────────────────┐     │
+│  │  useProductStore     │       │  useCartStore            │     │
+│  │  - products[]        │       │  - items[]               │     │
+│  │  - fetchState        │       │  - addItem()             │     │
+│  │  - fetchProducts()   │       │  - updateQuantity()      │     │
+│  │  - hydrateFromCache()│       │  - persist middleware    │     │
+│  └──────────┬───────────┘       └──────────────────────────┘     │
+└─────────────┼────────────────────────────────────────────────────┘
               │
-┌─────────────┴───────────────────────────────────────────────────┐
-│                          Data Layer                              │
-│  ┌──────────────────────┐       ┌──────────────────────────┐    │
-│  │  productApi.ts       │       │  AsyncStorage            │    │
-│  │  - fetchProducts()   │◄─────►│  - Product cache         │    │
-│  │  - fetchWithRetry()  │       │  - Cart persistence      │    │
-│  └──────────────────────┘       └──────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────┴────────────────────────────────────────────────────┐
+│                          Data Layer                               │
+│  ┌──────────────────────┐       ┌──────────────────────────┐     │
+│  │  productApi.ts       │       │  AsyncStorage            │     │
+│  │  - fetchProducts()   │◄─────►│  - Product cache         │     │
+│  │  - fetchWithRetry()  │       │  - Cart persistence      │     │
+│  └──────────────────────┘       └──────────────────────────┘     │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ### Key Design Decisions
@@ -63,7 +73,10 @@ src/
 │   ├── config.ts          # API configuration
 │   └── productApi.ts      # Product fetching with caching
 ├── components/            # Reusable UI components
+│   ├── AddToCartButton.tsx   # Sticky add-to-cart CTA
 │   ├── Badge.tsx
+│   ├── CartLineItem.tsx      # Cart item row with quantity stepper
+│   ├── CartSummary.tsx       # Sticky cart totals & checkout
 │   ├── EmptyState.tsx
 │   ├── ErrorBoundary.tsx
 │   ├── ErrorState.tsx
@@ -71,18 +84,26 @@ src/
 │   ├── LoadingSkeleton.tsx
 │   ├── OfflineBanner.tsx
 │   ├── PriceDisplay.tsx
+│   ├── ProductCard.tsx       # Product grid tile
+│   ├── ProductInfo.tsx       # Product detail info block
 │   ├── QuantityStepper.tsx
-│   └── VariantSelector.tsx
+│   ├── VariantSelector.tsx
+│   └── index.ts             # Barrel export
 ├── hooks/                 # Custom React hooks
+│   ├── useAddToCart.ts    # Add-to-cart logic & button state
+│   ├── useCart.ts         # Cart selectors, actions, formatting
 │   ├── useNetworkStatus.ts
-│   └── useVariantSelection.ts
+│   ├── useProducts.ts     # Product fetching & client-side pagination
+│   ├── useVariantSelection.ts
+│   └── index.ts           # Barrel export
 ├── navigation/            # React Navigation setup
 │   ├── RootNavigator.tsx
 │   └── types.ts
-├── screens/               # Screen components
+├── screens/               # Screen components (thin orchestrators)
 │   ├── CartScreen.tsx
 │   ├── ProductDetailScreen.tsx
-│   └── ProductListScreen.tsx
+│   ├── ProductListScreen.tsx
+│   └── index.ts
 ├── store/                 # Zustand stores
 │   ├── cartStore.ts
 │   └── productStore.ts
@@ -94,11 +115,22 @@ src/
 │   ├── api.ts
 │   ├── cart.ts
 │   └── product.ts
-└── utils/                 # Utility functions
-    ├── availability.ts    # Variant selection logic
-    ├── currency.ts        # Price formatting
-    ├── retry.ts           # Fetch with retry
-    └── storage.ts         # AsyncStorage wrapper
+├── utils/                 # Utility functions
+│   ├── availability.ts    # Variant selection logic
+│   ├── currency.ts        # Price formatting
+│   ├── image.ts           # Shopify CDN image URL transforms
+│   ├── retry.ts           # Fetch with retry
+│   ├── storage.ts         # AsyncStorage wrapper
+│   └── index.ts           # Barrel export
+└── __tests__/             # Unit tests
+    ├── components/
+    │   └── VariantSelector.test.tsx
+    ├── store/
+    │   ├── cartStore.test.ts
+    │   └── productStore.test.ts
+    └── utils/
+        ├── availability.test.ts
+        └── currency.test.ts
 ```
 
 ## Getting Started
@@ -110,6 +142,10 @@ src/
 - Xcode 15+ (iOS development)
 - Android Studio (Android development)
 - CocoaPods (iOS dependencies)
+
+### Environment Variables
+
+No environment variables are required. The product API URL is configured in `src/api/config.ts` and points to a hosted JSON feed.
 
 ### Installation
 

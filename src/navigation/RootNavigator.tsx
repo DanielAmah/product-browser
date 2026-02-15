@@ -2,14 +2,15 @@
  * RootNavigator
  *
  * Main navigation setup with BottomTabs and nested stacks.
- * Includes type-safe navigation and deep link configuration.
+ * Uses Lucide icons for a clean, modern look inspired by shop.app.
  */
 
 import React from 'react';
-import {StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, View, Platform} from 'react-native';
 import {NavigationContainer, LinkingOptions} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {Store, ShoppingBag} from 'lucide-react-native';
 
 import type {
   RootTabParamList,
@@ -18,7 +19,7 @@ import type {
 } from './types';
 import {ProductListScreen, ProductDetailScreen, CartScreen} from '@screens';
 import {useCartStore, selectTotalItems} from '@store/cartStore';
-import {colors, spacing, textStyles} from '@theme';
+import {colors, spacing} from '@theme';
 import {Badge} from '@components/Badge';
 
 // Create navigators
@@ -37,9 +38,11 @@ function ProductsStackNavigator() {
           backgroundColor: colors.background,
         },
         headerTitleStyle: {
-          ...textStyles.h3,
+          fontSize: 18,
+          fontWeight: '700',
           color: colors.textPrimary,
         },
+        headerTitleAlign: 'center',
         headerTintColor: colors.primary,
         headerBackTitle: '',
         headerShadowVisible: false,
@@ -49,6 +52,7 @@ function ProductsStackNavigator() {
         component={ProductListScreen}
         options={{
           title: 'Shop',
+          headerTitleAlign: 'center',
         }}
       />
       <ProductsStack.Screen
@@ -73,9 +77,11 @@ function CartStackNavigator() {
           backgroundColor: colors.background,
         },
         headerTitleStyle: {
-          ...textStyles.h3,
+          fontSize: 18,
+          fontWeight: '700',
           color: colors.textPrimary,
         },
+        headerTitleAlign: 'center',
         headerShadowVisible: false,
       }}>
       <CartStack.Screen
@@ -90,32 +96,18 @@ function CartStackNavigator() {
 }
 
 /**
- * Tab Bar Icon Components
+ * Cart Icon with badge
  */
-interface TabIconProps {
-  focused: boolean;
-  color: string;
-  size: number;
-}
-
-function ShopIcon({focused, color}: TabIconProps) {
-  return (
-    <View style={styles.iconContainer}>
-      <Text style={[styles.iconText, {color}]}>
-        {focused ? '🏠' : '🏠'}
-      </Text>
-    </View>
-  );
-}
-
-function CartIcon({focused, color}: TabIconProps) {
+function CartTabIcon({color, size}: {color: string; size: number}) {
   const totalItems = useCartStore(selectTotalItems);
 
   return (
     <View style={styles.iconContainer}>
-      <Text style={[styles.iconText, {color}]}>
-        {focused ? '🛒' : '🛒'}
-      </Text>
+      <ShoppingBag
+        size={size - 2}
+        color={color}
+        strokeWidth={1.8}
+      />
       {totalItems > 0 && <Badge count={totalItems} />}
     </View>
   );
@@ -156,13 +148,16 @@ export function RootNavigator() {
           tabBarActiveTintColor: colors.tabBarActive,
           tabBarInactiveTintColor: colors.tabBarInactive,
           tabBarLabelStyle: styles.tabBarLabel,
+          tabBarItemStyle: styles.tabBarItem,
         }}>
         <Tab.Screen
           name="ProductsTab"
           component={ProductsStackNavigator}
           options={{
             title: 'Shop',
-            tabBarIcon: ShopIcon,
+            tabBarIcon: ({color, size}) => (
+              <Store size={size - 2} color={color} strokeWidth={1.8} />
+            ),
             tabBarAccessibilityLabel: 'Shop tab',
           }}
         />
@@ -171,7 +166,9 @@ export function RootNavigator() {
           component={CartStackNavigator}
           options={{
             title: 'Cart',
-            tabBarIcon: CartIcon,
+            tabBarIcon: ({color, size}) => (
+              <CartTabIcon color={color} size={size} />
+            ),
             tabBarAccessibilityLabel: 'Cart tab',
           }}
         />
@@ -183,14 +180,19 @@ export function RootNavigator() {
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: colors.background,
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
+    borderTopColor: colors.borderLight,
+    borderTopWidth: StyleSheet.hairlineWidth,
     paddingTop: spacing.xs,
-    height: 60,
+    height: Platform.OS === 'ios' ? 88 : 64,
+    elevation: 0,
   },
   tabBarLabel: {
-    ...textStyles.caption,
-    marginBottom: spacing.xs,
+    fontSize: 11,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  tabBarItem: {
+    paddingTop: 4,
   },
   iconContainer: {
     position: 'relative',
@@ -198,8 +200,5 @@ const styles = StyleSheet.create({
     height: 28,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  iconText: {
-    fontSize: 22,
   },
 });
