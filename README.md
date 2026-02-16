@@ -10,6 +10,17 @@ A React Native mobile application for browsing products and managing a shopping 
 - Offline support — cached products + persisted cart
 - Full VoiceOver / TalkBack accessibility
 
+## Screenshots
+<img width="1170" height="2532" alt="Simulator Screenshot - iPhone 16e - 2026-02-15 at 17 29 46" src="https://github.com/user-attachments/assets/aaa32741-7053-4942-a888-4132e33629da" />
+<img width="1170" height="2532" alt="Simulator Screenshot - iPhone 16e - 2026-02-15 at 17 29 18" src="https://github.com/user-attachments/assets/bcc15f13-2dfe-4c72-998f-626c4d96cea2" />
+<img width="1170" height="2532" alt="Simulator Screenshot - iPhone 16e - 2026-02-15 at 17 29 11" src="https://github.com/user-attachments/assets/324d508e-bbfb-44f6-88ec-460cf4397ad1" />
+<img width="1170" height="2532" alt="Simulator Screenshot - iPhone 16e - 2026-02-15 at 17 28 37" src="https://github.com/user-attachments/assets/851724e2-b2b2-40cd-bcbc-926d35c7e458" />
+<img width="1170" height="2532" alt="Simulator Screenshot - iPhone 16e - 2026-02-15 at 17 28 26" src="https://github.com/user-attachments/assets/2fccec81-2b45-4170-a16d-58d2d7deeef4" />
+<img width="1170" height="2532" alt="Simulator Screenshot - iPhone 16e - 2026-02-15 at 17 28 19" src="https://github.com/user-attachments/assets/b43b86b9-0546-413f-873d-3f0647f1ab22" />
+<img width="1080" height="2400" alt="Screenshot_1771201358" src="https://github.com/user-attachments/assets/cd295144-3e84-40ba-b528-06232fc02b89" />
+<img width="1080" height="2400" alt="Screenshot_1771201351" src="https://github.com/user-attachments/assets/4c5478a9-4918-46f4-bff2-76f73af787a5" />
+
+
 ## Architecture
 
 ```
