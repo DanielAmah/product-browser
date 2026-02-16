@@ -1,23 +1,10 @@
-/**
- * Currency Utilities
- *
- * Functions for parsing, formatting, and comparing prices.
- */
-
 import type {Money} from '@apptypes/product';
 
-/**
- * Parse a Money amount to a number.
- */
 export function parseMoney(money: Money): number {
   return parseFloat(money.amount);
 }
 
-/**
- * Format a Money value for display.
- *
- * @example formatPrice({ amount: "28.96", currencyCode: "CAD" }) => "$28.96 CAD"
- */
+/** @example formatPrice({ amount: "28.96", currencyCode: "CAD" }) => "$28.96 CAD" */
 export function formatPrice(money: Money): string {
   const amount = parseMoney(money);
   const formatted = amount.toLocaleString('en-CA', {
@@ -30,7 +17,7 @@ export function formatPrice(money: Money): string {
 }
 
 /**
- * Format a Money value for VoiceOver/TalkBack.
+ * VoiceOver/TalkBack-friendly price string.
  * Reads as "28 dollars and 96 cents Canadian" instead of "$28.96 CAD".
  */
 export function formatPriceForVoiceOver(money: Money): string {
@@ -48,9 +35,8 @@ export function formatPriceForVoiceOver(money: Money): string {
 }
 
 /**
- * Check if a compareAtPrice indicates a genuine sale.
- * Returns true only when compareAtPrice is present, non-zero,
- * and strictly greater than the current price.
+ * True when compareAtPrice is present, non-zero, and strictly greater than
+ * the current price (i.e. an actual discount, not just stale metadata).
  */
 export function isOnSale(
   compareAtPrice: Money | null,
@@ -63,16 +49,12 @@ export function isOnSale(
   if (compareAmount <= 0) {
     return false;
   }
-  // When a current price is provided, only flag as sale if there's an actual discount
   if (currentPrice) {
     return compareAmount > parseMoney(currentPrice);
   }
   return true;
 }
 
-/**
- * Calculate the discount percentage between two prices.
- */
 export function calculateDiscountPercentage(
   originalPrice: Money,
   salePrice: Money,

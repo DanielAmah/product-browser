@@ -1,7 +1,3 @@
-/**
- * Components barrel export
- */
-
 export {OfflineBanner} from './OfflineBanner';
 export {LoadingSkeleton} from './LoadingSkeleton';
 export {EmptyState} from './EmptyState';

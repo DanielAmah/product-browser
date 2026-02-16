@@ -1,13 +1,6 @@
-/**
- * Product Domain Types
- *
- * All types are exported and use `interface` for extendability.
- * Money.amount remains `string` at the API boundary; parsing happens in utility functions.
- */
-
 export interface Money {
-  amount: string; // "28.96" -- string from API, parsed at usage site
-  currencyCode: string; // "CAD"
+  amount: string; // string from API, parsed at usage site
+  currencyCode: string;
 }
 
 export interface ProductImage {
@@ -27,8 +20,8 @@ export interface MediaImage {
 }
 
 export interface SelectedOption {
-  name: string; // "Color" | "Size"
-  value: string; // "Black" | "S"
+  name: string;
+  value: string;
 }
 
 export interface ProductOption {

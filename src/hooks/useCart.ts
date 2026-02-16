@@ -1,10 +1,3 @@
-/**
- * useCart Hook
- *
- * Encapsulates cart store selectors, actions, and derived formatting.
- * Keeps the CartScreen thin and testable.
- */
-
 import {useCallback} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -44,7 +37,6 @@ export function useCart() {
     navigation.navigate('ProductsTab', {screen: 'ProductList'});
   }, [navigation]);
 
-  // Formatted totals
   const subtotalFormatted = formatPrice({
     amount: subtotal.toFixed(2),
     currencyCode: 'CAD',

@@ -4,11 +4,11 @@ A React Native mobile application for browsing products and managing a shopping 
 
 ## Features
 
-- **Product Catalog**: Browse products in a responsive 2-column grid
-- **Product Details**: View product images, descriptions, and select variants (size, color, etc.)
-- **Shopping Cart**: Add items, adjust quantities, view totals
-- **Offline Support**: Browse cached products and retain cart when offline
-- **Accessibility**: Full VoiceOver/TalkBack support with semantic labels
+- 2-column product grid with pull-to-refresh and infinite scroll
+- Product detail with image carousel, variant selection, and add-to-cart
+- Cart with quantity management, line totals, and subtotal
+- Offline support — cached products + persisted cart
+- Full VoiceOver / TalkBack accessibility
 
 ## Architecture
 
@@ -122,15 +122,14 @@ src/
 │   ├── retry.ts           # Fetch with retry
 │   ├── storage.ts         # AsyncStorage wrapper
 │   └── index.ts           # Barrel export
-└── __tests__/             # Unit tests
-    ├── components/
-    │   └── VariantSelector.test.tsx
-    ├── store/
-    │   ├── cartStore.test.ts
-    │   └── productStore.test.ts
-    └── utils/
-        ├── availability.test.ts
-        └── currency.test.ts
+└── __tests__/             # Unit tests (33 suites, 203 tests)
+    ├── api/               # API + config tests
+    ├── components/        # All component tests
+    ├── helpers/           # Shared fixtures
+    ├── hooks/             # Hook tests
+    ├── screens/           # Screen tests
+    ├── store/             # Store tests
+    └── utils/             # Utility tests
 ```
 
 ## Getting Started
@@ -145,7 +144,7 @@ src/
 
 ### Environment Variables
 
-No environment variables are required. The product API URL is configured in `src/api/config.ts` and points to a hosted JSON feed.
+None required. Product API URL is in `src/api/config.ts` (points to a hosted JSON feed).
 
 ### Installation
 
@@ -186,25 +185,22 @@ npm test -- --coverage
 npm test -- --watch
 ```
 
-## Technical Constraints Met
+## Technical Constraints
 
-- ✅ **Pure React Native** (no Expo) - Bare CLI project
-- ✅ **TypeScript** - Strict typing throughout
-- ✅ **Type-safe Navigation** - React Navigation with typed params
-- ✅ **Predictable State** - Zustand with testable stores
-- ✅ **Local Persistence** - AsyncStorage for cache and cart
-- ✅ **Unit Tests** - Jest tests for stores and utilities
-- ✅ **Accessibility** - VoiceOver/TalkBack labels and roles
+- Pure React Native (no Expo) — bare CLI project
+- TypeScript with strict mode
+- Type-safe navigation via React Navigation composite screen props
+- Zustand for state management with built-in persistence
+- AsyncStorage for product cache + cart persistence
+- 203 unit tests across 33 suites (Jest + @testing-library/react-native)
+- Full VoiceOver / TalkBack support
 
 ## Tradeoffs & Known Limitations
 
-1. **react-native-fast-image omitted**: Peer dependency conflict with React 19. Using native `Image` component as fallback. See `DECISION_LOG.md` for details.
-
-2. **No E2E tests**: Detox setup requires additional configuration. Unit tests cover core business logic.
-
-3. **No checkout flow**: Scope limited to browsing and cart management per requirements.
-
-4. **Single currency assumption**: Price formatting assumes CAD. Would need locale detection for multi-currency.
+- **react-native-fast-image omitted** — peer dependency conflict with React 19. Native `Image` as fallback. See DECISION_LOG.md #3.
+- **No E2E tests** — Detox setup was out of scope. Unit tests cover business logic; manual testing covers flows.
+- **No checkout flow** — scope limited to browsing and cart per requirements.
+- **CAD-only pricing** — would need locale-aware currency detection for multi-currency.
 
 ## License
 

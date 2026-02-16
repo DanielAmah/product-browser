@@ -1,11 +1,3 @@
-/**
- * ProductInfo Component
- *
- * Displays vendor, title, price, availability, description, and tags
- * for a product on the detail screen.
- * Inspired by Borough Kitchen's clean, sectioned product layout.
- */
-
 import React, {useState, memo} from 'react';
 import {View, Text, StyleSheet, Pressable} from 'react-native';
 import {ChevronDown, ChevronUp, CheckCircle, XCircle} from 'lucide-react-native';
@@ -47,15 +39,12 @@ export const ProductInfo = memo(function ProductInfo({
 
   return (
     <View style={styles.content}>
-      {/* Title — hero element, large and bold */}
       <Text style={styles.title} accessibilityRole="header">
         {product.title}
       </Text>
 
-      {/* Vendor */}
       <Text style={styles.vendor}>{product.vendor}</Text>
 
-      {/* Price */}
       {selectedVariant && (
         <View style={styles.priceSection}>
           <PriceDisplay
@@ -71,10 +60,8 @@ export const ProductInfo = memo(function ProductInfo({
         </View>
       )}
 
-      {/* Divider */}
       <View style={styles.divider} />
 
-      {/* Availability indicator */}
       <View style={styles.availabilityRow}>
         {isAvailable ? (
           <>
@@ -89,7 +76,6 @@ export const ProductInfo = memo(function ProductInfo({
         )}
       </View>
 
-      {/* Variant Selector */}
       {product.options.length > 0 && (
         <View style={styles.variantSection}>
           <VariantSelector
@@ -101,10 +87,8 @@ export const ProductInfo = memo(function ProductInfo({
         </View>
       )}
 
-      {/* Divider */}
       <View style={styles.divider} />
 
-      {/* Product Details — collapsible */}
       {product.description ? (
         <View style={styles.section}>
           <Pressable
@@ -126,7 +110,6 @@ export const ProductInfo = memo(function ProductInfo({
         </View>
       ) : null}
 
-      {/* Tags */}
       {product.tags && product.tags.length > 0 && (
         <>
           <View style={styles.divider} />

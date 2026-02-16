@@ -1,10 +1,3 @@
-/**
- * RootNavigator
- *
- * Main navigation setup with BottomTabs and nested stacks.
- * Uses Lucide icons for a clean, modern look inspired by shop.app.
- */
-
 import React from 'react';
 import {StyleSheet, View, Platform} from 'react-native';
 import {NavigationContainer, LinkingOptions} from '@react-navigation/native';
@@ -22,14 +15,10 @@ import {useCartStore, selectTotalItems} from '@store/cartStore';
 import {colors, spacing} from '@theme';
 import {Badge} from '@components/Badge';
 
-// Create navigators
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const ProductsStack = createNativeStackNavigator<ProductsStackParamList>();
 const CartStack = createNativeStackNavigator<CartStackParamList>();
 
-/**
- * Products Stack Navigator
- */
 function ProductsStackNavigator() {
   return (
     <ProductsStack.Navigator
@@ -66,9 +55,6 @@ function ProductsStackNavigator() {
   );
 }
 
-/**
- * Cart Stack Navigator
- */
 function CartStackNavigator() {
   return (
     <CartStack.Navigator
@@ -95,9 +81,6 @@ function CartStackNavigator() {
   );
 }
 
-/**
- * Cart Icon with badge
- */
 function CartTabIcon({color, size}: {color: string; size: number}) {
   const totalItems = useCartStore(selectTotalItems);
 
@@ -113,9 +96,6 @@ function CartTabIcon({color, size}: {color: string; size: number}) {
   );
 }
 
-/**
- * Deep linking configuration
- */
 const linking: LinkingOptions<RootTabParamList> = {
   prefixes: ['reactiv://'],
   config: {
@@ -135,9 +115,6 @@ const linking: LinkingOptions<RootTabParamList> = {
   },
 };
 
-/**
- * Root Navigator Component
- */
 export function RootNavigator() {
   return (
     <NavigationContainer linking={linking}>

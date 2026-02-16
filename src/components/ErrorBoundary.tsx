@@ -1,11 +1,3 @@
-/**
- * ErrorBoundary Component
- *
- * Catches render-phase crashes and shows a friendly fallback UI.
- * Provides a primary "Try Again" action, an optional expandable
- * error-detail section for debugging, and full accessibility support.
- */
-
 import React, {Component, ErrorInfo, ReactNode} from 'react';
 import {
   View,
@@ -43,7 +35,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // In production: send to crash reporting (Sentry, Crashlytics)
+    // TODO: send to Sentry / Crashlytics
     console.error('ErrorBoundary caught:', error, errorInfo);
   }
 
@@ -81,7 +73,6 @@ export class ErrorBoundary extends Component<Props, State> {
           style={[styles.container, {opacity: this.fadeAnim}]}
           accessibilityRole="alert"
           accessibilityLiveRegion="assertive">
-          {/* Icon */}
           <View style={styles.iconCircle}>
             <AlertTriangle
               size={32}
@@ -90,16 +81,13 @@ export class ErrorBoundary extends Component<Props, State> {
             />
           </View>
 
-          {/* Heading */}
           <Text style={styles.title}>Something went wrong</Text>
 
-          {/* Friendly explanation */}
           <Text style={styles.message}>
             The app ran into an unexpected problem.{'\n'}
             Your data is safe — try restarting to get back on track.
           </Text>
 
-          {/* Primary action */}
           <Pressable
             style={({pressed}) => [
               styles.primaryButton,
@@ -113,7 +101,6 @@ export class ErrorBoundary extends Component<Props, State> {
             <Text style={styles.primaryButtonText}>Try Again</Text>
           </Pressable>
 
-          {/* Expandable error details */}
           {error && (
             <View style={styles.detailsSection}>
               <Pressable
@@ -161,7 +148,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
-  // Icon
   iconCircle: {
     width: 72,
     height: 72,
@@ -172,7 +158,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
 
-  // Text
   title: {
     ...textStyles.h2,
     color: colors.textPrimary,
@@ -187,7 +172,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xxl,
   },
 
-  // Primary button
   primaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -219,7 +203,6 @@ const styles = StyleSheet.create({
     color: colors.textInverse,
   },
 
-  // Expandable details
   detailsSection: {
     width: '100%',
     marginTop: spacing.xxxl,

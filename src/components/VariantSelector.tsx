@@ -1,10 +1,3 @@
-/**
- * VariantSelector Component
- *
- * Displays option pills for variant selection.
- * Supports multiple option axes (Color, Size, etc.).
- */
-
 import React, {useCallback, useRef} from 'react';
 import {View, Text, StyleSheet, Pressable} from 'react-native';
 import type {ProductOption} from '@apptypes/product';

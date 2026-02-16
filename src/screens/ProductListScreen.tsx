@@ -1,11 +1,3 @@
-/**
- * ProductListScreen
- *
- * Displays the product catalog in a 2-column grid with pagination.
- * Uses FlashList for high-performance recycling and the useProducts hook
- * for data management.
- */
-
 import React, {useCallback} from 'react';
 import {
   View,
@@ -28,7 +20,6 @@ import {ErrorState} from '@components/ErrorState';
 
 const HORIZONTAL_PADDING = 16;
 
-/** Footer spinner shown while loading the next page */
 function ListFooter({visible}: {visible: boolean}) {
   if (!visible) {
     return null;
@@ -74,8 +65,6 @@ export function ProductListScreen({navigation}: ProductListScreenProps) {
   );
 
   const keyExtractor = useCallback((item: Product) => item.id, []);
-
-  // --- Guard states ---
 
   if (!isHydrated) {
     return (

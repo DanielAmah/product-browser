@@ -1,10 +1,3 @@
-/**
- * ProductCard Component
- *
- * Renders a single product tile in the grid.
- * Shows image, vendor, title, and price with sale badge.
- */
-
 import React from 'react';
 import {View, Text, StyleSheet, Pressable, Image, Dimensions} from 'react-native';
 import type {Product} from '@apptypes/product';

@@ -1,9 +1,3 @@
-/**
- * Fetch with Retry Utility
- *
- * Implements fetch with timeout, retry, and exponential backoff.
- */
-
 import {NetworkError} from '@apptypes/api';
 
 interface FetchWithRetryOptions {
@@ -12,21 +6,11 @@ interface FetchWithRetryOptions {
   signal?: AbortSignal;
 }
 
-/**
- * Delay helper for exponential backoff
- */
 function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/**
- * Fetch with automatic retry and timeout handling.
- *
- * @param url - The URL to fetch
- * @param options - Configuration options
- * @returns The fetch Response
- * @throws NetworkError on failure
- */
+/** Fetch with automatic retry, timeout, and exponential backoff. */
 export async function fetchWithRetry(
   url: string,
   options: FetchWithRetryOptions,
@@ -50,7 +34,6 @@ export async function fetchWithRetry(
     } catch (err) {
       clearTimeout(timeoutId);
 
-      // Handle AbortError (timeout)
       if (err instanceof Error && err.name === 'AbortError') {
         lastError = new NetworkError('Request timed out', true);
       } else if (err instanceof NetworkError) {
@@ -61,10 +44,8 @@ export async function fetchWithRetry(
         lastError = new NetworkError(String(err), false);
       }
 
-      // Don't retry on last attempt
       if (attempt < maxRetries) {
-        // Exponential backoff: 1s, 2s, 4s
-        await delay(Math.pow(2, attempt) * 1000);
+        await delay(Math.pow(2, attempt) * 1000); // exponential backoff
       }
     }
   }

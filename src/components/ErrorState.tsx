@@ -1,9 +1,3 @@
-/**
- * ErrorState Component
- *
- * Displays an error state with retry button.
- */
-
 import React from 'react';
 import {View, Text, StyleSheet, Pressable} from 'react-native';
 import {colors, spacing, layout, textStyles} from '@theme';

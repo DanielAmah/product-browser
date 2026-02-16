@@ -1,9 +1,3 @@
-/**
- * OfflineBanner Component
- *
- * Displays a banner when the device is offline.
- */
-
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import {colors, spacing, textStyles} from '@theme';

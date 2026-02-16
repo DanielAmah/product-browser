@@ -1,10 +1,3 @@
-/**
- * LoadingSkeleton Component
- *
- * Displays animated placeholder cards that mirror the ProductCard layout.
- * Uses a pulsing opacity animation to indicate content is loading.
- */
-
 import React, {useEffect, useRef} from 'react';
 import {View, Animated, StyleSheet, Dimensions} from 'react-native';
 import {colors, spacing} from '@theme';
@@ -13,11 +6,8 @@ const {width: SCREEN_WIDTH} = Dimensions.get('window');
 const CARD_GAP = 12;
 const HORIZONTAL_PADDING = 16;
 const CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
-
-/** Number of skeleton rows to display */
 const SKELETON_ROWS = 3;
 
-/** Reusable animated bone shape */
 function Bone({
   width,
   height,
@@ -40,14 +30,10 @@ function Bone({
   );
 }
 
-/** Single skeleton card matching ProductCard layout */
 function SkeletonCard({pulseAnim}: {pulseAnim: Animated.Value}) {
   return (
     <View style={styles.card}>
-      {/* Square image placeholder */}
       <Animated.View style={[styles.image, {opacity: pulseAnim}]} />
-
-      {/* Text placeholders */}
       <View style={styles.content}>
         <Bone width="40%" height={8} pulseAnim={pulseAnim} />
         <Bone

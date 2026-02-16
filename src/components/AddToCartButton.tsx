@@ -1,10 +1,3 @@
-/**
- * AddToCartButton Component
- *
- * Sticky bottom button for adding a product variant to the cart.
- * Borough Kitchen-inspired: full-width, dark, prominent.
- */
-
 import React from 'react';
 import {View, Text, StyleSheet, Pressable, Platform} from 'react-native';
 import {ShoppingBag} from 'lucide-react-native';

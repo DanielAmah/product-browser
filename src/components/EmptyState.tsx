@@ -1,9 +1,3 @@
-/**
- * EmptyState Component
- *
- * Displays an empty state with optional action button.
- */
-
 import React from 'react';
 import {View, Text, StyleSheet, Pressable} from 'react-native';
 import {colors, spacing, layout, textStyles} from '@theme';

@@ -1,10 +1,3 @@
-/**
- * ProductDetailScreen
- *
- * Displays product details with variant selection and add to cart.
- * Composed from ProductInfo, ImageCarousel, and AddToCartButton.
- */
-
 import React, {useCallback} from 'react';
 import {View, Text, ScrollView, StyleSheet} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -23,7 +16,6 @@ export function ProductDetailScreen({
   const {productId} = route.params;
   const insets = useSafeAreaInsets();
 
-  // Stable selector — only re-renders when the specific product changes
   const product = useProductStore(
     useCallback(s => s.products.find(p => p.id === productId), [productId]),
   );
@@ -43,7 +35,6 @@ export function ProductDetailScreen({
     buttonAccessibilityLabel,
   } = useAddToCart({product, selectedVariant, isPurchasable});
 
-  // Image the carousel should scroll to when a variant is selected
   const focusImageId = selectedVariant?.image?.id;
 
   if (!product) {

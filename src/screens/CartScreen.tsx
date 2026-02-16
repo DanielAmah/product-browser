@@ -1,10 +1,3 @@
-/**
- * CartScreen
- *
- * Displays cart items with quantity management and order summary.
- * Uses FlashList for performant rendering and the useCart hook for state.
- */
-
 import React, {useCallback} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {FlashList} from '@shopify/flash-list';

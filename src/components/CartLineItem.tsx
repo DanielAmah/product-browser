@@ -1,10 +1,3 @@
-/**
- * CartLineItem Component
- *
- * Renders a single item row in the shopping cart.
- * Displays thumbnail, title, variant, price, and quantity stepper.
- */
-
 import React, {useCallback} from 'react';
 import {
   View,
@@ -58,7 +51,6 @@ export const CartLineItem = React.memo<CartLineItemProps>(
         style={styles.lineItem}
         accessibilityRole="none"
         accessibilityLabel={`${item.productTitle}, ${item.variantTitle}, quantity ${item.quantity}, ${formatPriceForVoiceOver(item.price)} each`}>
-        {/* Thumbnail */}
         <View style={styles.thumbnailContainer}>
           {item.image?.url ? (
             <Image
@@ -72,7 +64,6 @@ export const CartLineItem = React.memo<CartLineItemProps>(
           )}
         </View>
 
-        {/* Item Details */}
         <View style={styles.itemDetails}>
           <Text style={styles.itemTitle} numberOfLines={2}>
             {item.productTitle}

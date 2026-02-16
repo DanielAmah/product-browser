@@ -1,452 +1,313 @@
-# Product Browser + Cart - Ticket Breakdown
+# Ticket Breakdown
 
-This document contains the ticket breakdown for implementing the Product Browser + Cart React Native application. Each ticket is scoped for ~1-2 days of work and includes acceptance criteria.
+**Project:** Reactiv-assessment
+**Assignee:** Daniel Amah
+**Tracker:** Linear (REA project)
 
----
-
-## Epic: Project Foundation
-
-### TICKET-001: Project Initialization & Configuration
-**Type**: Setup  
-**Priority**: P0 - Blocker  
-**Estimated**: 0.5 days
-
-**Description**:
-Initialize a bare React Native CLI project with TypeScript template and configure development tooling.
-
-**Acceptance Criteria**:
-- [ ] React Native CLI project created (no Expo)
-- [ ] TypeScript configured with strict mode
-- [ ] Path aliases configured in tsconfig.json and babel.config.js (@api, @components, @hooks, @navigation, @screens, @store, @theme, @apptypes, @utils)
-- [ ] ESLint and Prettier configured
-- [ ] Project builds successfully on iOS and Android simulators
-- [ ] Git repository initialized with .gitignore
-
-**Branch**: `feature/TICKET-001-project-init`
+Full ticket breakdown as tracked in Linear, exported here so reviewers without Linear access have visibility into scope, dependencies, and status.
 
 ---
 
-### TICKET-002: Domain Type Definitions
-**Type**: Feature  
-**Priority**: P0 - Blocker  
-**Estimated**: 0.5 days
+## Phase 1 — Foundation
 
-**Description**:
-Define TypeScript interfaces for all domain entities based on the product feed JSON structure.
+### REA-5: Project Initialization & Configuration
+**P0 · Setup · 1pt · ✅ Done**
+Branch: `dnlamah1/rea-5-ticket-001-project-initialization-configuration`
 
-**Acceptance Criteria**:
-- [ ] `src/types/product.ts` - Money, ProductImage, MediaImage, SelectedOption, ProductOption, Variant, Product interfaces
-- [ ] `src/types/cart.ts` - CartItem, CartItemInput interfaces
-- [ ] `src/types/api.ts` - CacheEntry, FetchState, NetworkError types
-- [ ] Barrel export in `src/types/index.ts`
-- [ ] All types compile without errors
+Init bare React Native CLI project with TypeScript template. Configure path aliases (`@api`, `@components`, `@hooks`, `@screens`, `@store`, `@theme`, `@apptypes`, `@utils`), ESLint, Prettier. Verify builds on iOS and Android sims.
 
-**Branch**: `feature/TICKET-002-domain-types`
+- [x] RN CLI project (no Expo), strict TS
+- [x] Path aliases in tsconfig + babel
+- [x] ESLint + Prettier
+- [x] Builds on both platforms
+- [x] Git repo + .gitignore
 
 ---
 
-### TICKET-003: Theme System Setup
-**Type**: Feature  
-**Priority**: P0 - Blocker  
-**Estimated**: 0.5 days
+### REA-6: Domain Type Definitions
+**P0 · Feature · 1pt · ✅ Done**
+Branch: `dnlamah1/rea-6-ticket-002-domain-type-definitions`
+Depends on: REA-5
 
-**Description**:
-Create centralized theme constants for consistent UI styling across the app.
+TypeScript interfaces for all domain entities based on the product feed JSON. `product.ts` (Money, ProductImage, MediaImage, SelectedOption, ProductOption, Variant, Product), `cart.ts` (CartItem, CartItemInput), `api.ts` (CacheEntry, FetchState, NetworkError).
 
-**Acceptance Criteria**:
-- [ ] `src/theme/colors.ts` - Semantic color tokens (primary, background, text, border, etc.)
-- [ ] `src/theme/spacing.ts` - 4px grid spacing scale and layout dimensions
-- [ ] `src/theme/typography.ts` - Font families, sizes, weights, and predefined text styles
-- [ ] Barrel export in `src/theme/index.ts`
-- [ ] Theme values are type-safe constants
-
-**Branch**: `feature/TICKET-003-theme-system`
+- [x] All types defined and compiling
+- [x] Barrel export
 
 ---
 
-## Epic: Navigation
+### REA-7: Theme System
+**P0 · Feature · 1pt · ✅ Done**
+Branch: `dnlamah1/rea-7-ticket-003-theme-system-setup`
+Depends on: REA-5
 
-### TICKET-004: Navigation Structure
-**Type**: Feature  
-**Priority**: P0 - Blocker  
-**Estimated**: 1 day
-
-**Description**:
-Set up React Navigation with type-safe bottom tabs and stack navigators.
-
-**Acceptance Criteria**:
-- [ ] Install @react-navigation/native, @react-navigation/bottom-tabs, @react-navigation/native-stack
-- [ ] `src/navigation/types.ts` - Type definitions for all navigation params (ProductsStackParamList, CartStackParamList, RootTabParamList)
-- [ ] `src/navigation/RootNavigator.tsx` - Bottom tab navigator with Products and Cart tabs
-- [ ] ProductsStack with ProductList and ProductDetail screens
-- [ ] CartStack with Cart screen
-- [ ] Custom tab bar icons with cart badge
-- [ ] Deep linking configuration
-- [ ] Navigation is fully type-safe (no `any` types)
-
-**Branch**: `feature/TICKET-004-navigation`
+Semantic color tokens, 4px spacing grid, typography scale (font families, sizes, weights, predefined text styles). All type-safe constants with barrel export.
 
 ---
 
-## Epic: Data Layer
+## Phase 2 — Infrastructure
 
-### TICKET-005: API Layer & Caching
-**Type**: Feature  
-**Priority**: P0 - Blocker  
-**Estimated**: 1 day
+### REA-8: Navigation Structure
+**P0 · Feature · 2pt · ✅ Done**
+Branch: `dnlamah1/rea-8-ticket-004-navigation-structure`
+Depends on: REA-5, REA-6
 
-**Description**:
-Build the API layer with fetch utilities, retry logic, and AsyncStorage caching.
+React Navigation with type-safe bottom tabs (Products, Cart) and nested stacks. `native-stack` for native perf. Custom tab bar icons with cart badge count. Deep linking config. Full type safety — no `any` types.
 
-**Acceptance Criteria**:
-- [ ] `src/api/config.ts` - API endpoints, timeouts, cache settings
-- [ ] `src/utils/retry.ts` - fetchWithRetry with timeout and exponential backoff
-- [ ] `src/utils/storage.ts` - Type-safe AsyncStorage wrapper
-- [ ] `src/api/productApi.ts` - fetchProducts, readProductsCache, writeProductsCache, getErrorMessage
-- [ ] NetworkError class for distinguishing timeout vs network errors
-- [ ] Stale-while-revalidate caching pattern implemented
-- [ ] Unit tests for retry utility
-
-**Branch**: `feature/TICKET-005-api-layer`
+- [x] Bottom tabs + nested stacks
+- [x] Type-safe navigation params
+- [x] Cart badge on tab icon
+- [x] Deep linking
+- [x] Composite screen props for nested navigators
 
 ---
 
-### TICKET-006: Product Store
-**Type**: Feature  
-**Priority**: P0 - Blocker  
-**Estimated**: 1 day
+### REA-9: API Layer & Caching
+**P0 · Feature · 2pt · ✅ Done**
+Branch: `dnlamah1/rea-9-ticket-005-api-layer-caching`
+Depends on: REA-5, REA-6
 
-**Description**:
-Create Zustand store for product state management with caching integration.
+`fetchWithRetry` with timeout + exponential backoff, typed AsyncStorage wrapper, product API module with stale-while-revalidate caching. NetworkError class distinguishes timeout vs network failures.
 
-**Acceptance Criteria**:
-- [ ] `src/store/productStore.ts` with Zustand
-- [ ] State: products[], fetchState (discriminated union), error, lastFetched, isHydrated
-- [ ] Actions: hydrateFromCache(), fetchProducts()
-- [ ] Selectors: getProductById()
-- [ ] Request deduplication for concurrent fetches
-- [ ] Proper loading vs refreshing state distinction
-- [ ] Unit tests for store actions and selectors
-
-**Branch**: `feature/TICKET-006-product-store`
+- [x] Retry with configurable timeout/backoff
+- [x] Typed storage wrapper
+- [x] fetchProducts, readProductsCache, writeProductsCache
+- [x] Unit tests for retry utility
 
 ---
 
-### TICKET-007: Cart Store with Persistence
-**Type**: Feature  
-**Priority**: P0 - Blocker  
-**Estimated**: 1 day
+### REA-10: Product Store
+**P0 · Feature · 2pt · ✅ Done**
+Branch: `dnlamah1/rea-10-ticket-006-product-store`
+Depends on: REA-9
 
-**Description**:
-Create Zustand store for cart management with AsyncStorage persistence.
+Zustand store: products[], fetchState (discriminated union), error, lastFetched, isHydrated. Actions: hydrateFromCache(), fetchProducts(). Request deduplication. Loading vs refreshing distinction for stale-while-revalidate UX.
 
-**Acceptance Criteria**:
-- [ ] `src/store/cartStore.ts` with Zustand persist middleware
-- [ ] State: items[]
-- [ ] Actions: addItem(), removeItem(), updateQuantity(), clearCart()
-- [ ] Selectors: selectSubtotal(), selectTotalItems(), selectCartItemByVariant()
-- [ ] Auto-remove items when quantity reaches 0
-- [ ] Cart persists across app restarts
-- [ ] Versioned migration support
-- [ ] Unit tests for store actions and selectors
-
-**Branch**: `feature/TICKET-007-cart-store`
+- [x] Store with all state + actions
+- [x] Request dedup
+- [x] Unit tests
 
 ---
 
-## Epic: Shared Components
+### REA-11: Cart Store with Persistence
+**P0 · Feature · 2pt · ✅ Done**
+Branch: `dnlamah1/rea-11-ticket-007-cart-store-with-persistence`
+Depends on: REA-6
 
-### TICKET-008: Network Status Hook & Banner
-**Type**: Feature  
-**Priority**: P1 - High  
-**Estimated**: 0.5 days
+Zustand + persist middleware backed by AsyncStorage. items[] with addItem, removeItem, updateQuantity, clearCart. Derived selectors: subtotal, totalItems, cartItemByVariant. Auto-removes items when qty hits 0. Versioned migration support.
 
-**Description**:
-Implement network connectivity detection and offline indicator.
-
-**Acceptance Criteria**:
-- [ ] Install @react-native-community/netinfo
-- [ ] `src/hooks/useNetworkStatus.ts` - Hook returning isConnected, isInternetReachable
-- [ ] `src/components/OfflineBanner.tsx` - Visual indicator when offline
-- [ ] Banner appears/disappears based on network state
-- [ ] Accessible announcement when connectivity changes
-
-**Branch**: `feature/TICKET-008-network-status`
+- [x] Persist middleware with partialize
+- [x] All CRUD actions
+- [x] Derived selectors
+- [x] Unit tests
 
 ---
 
-### TICKET-009: Shared UI Components - Part 1
-**Type**: Feature  
-**Priority**: P1 - High  
-**Estimated**: 1 day
+## Phase 3 — Components
 
-**Description**:
-Build reusable UI components for loading, error, and empty states.
+### REA-12: Network Status Hook & Banner
+**P1 · Feature · 1pt · ✅ Done**
+Branch: `dnlamah1/rea-12-ticket-008-network-status-hook-banner`
+Depends on: REA-5
 
-**Acceptance Criteria**:
-- [ ] `src/components/LoadingSkeleton.tsx` - Grid of placeholder cards
-- [ ] `src/components/EmptyState.tsx` - Icon, title, message, optional CTA button
-- [ ] `src/components/ErrorState.tsx` - Error message with retry button
-- [ ] `src/components/ErrorBoundary.tsx` - Top-level error boundary with fallback UI
-- [ ] All components have accessibility labels
-- [ ] Components are memoized where appropriate
-
-**Branch**: `feature/TICKET-009-shared-components-1`
+`useNetworkStatus` hook wrapping NetInfo. `OfflineBanner` component that appears when offline. Accessible.
 
 ---
 
-### TICKET-010: Shared UI Components - Part 2
-**Type**: Feature  
-**Priority**: P1 - High  
-**Estimated**: 1 day
+### REA-13: Shared UI Components — Part 1
+**P1 · Feature · 2pt · ✅ Done**
+Branch: `dnlamah1/rea-13-ticket-009-shared-ui-components-part-1`
+Depends on: REA-7
 
-**Description**:
-Build reusable UI components for product display and cart interactions.
-
-**Acceptance Criteria**:
-- [ ] `src/components/Badge.tsx` - Numeric badge for cart count
-- [ ] `src/components/PriceDisplay.tsx` - Price with optional compare-at price (sale indicator)
-- [ ] `src/components/QuantityStepper.tsx` - Increment/decrement with trash icon at qty=1
-- [ ] `src/components/ImageCarousel.tsx` - Horizontal image pager with pagination dots
-- [ ] All components have accessibility support
-- [ ] Unit tests for QuantityStepper interactions
-
-**Branch**: `feature/TICKET-010-shared-components-2`
+LoadingSkeleton (grid of placeholder cards), EmptyState (icon + title + message + optional CTA), ErrorState (message + retry), ErrorBoundary (top-level crash fallback with expandable details). All with a11y labels. Memoized where it matters.
 
 ---
 
-### TICKET-011: Variant Selector Component
-**Type**: Feature  
-**Priority**: P1 - High  
-**Estimated**: 1 day
+### REA-14: Shared UI Components — Part 2
+**P1 · Feature · 2pt · ✅ Done**
+Branch: `dnlamah1/rea-14-ticket-010-shared-ui-components-part-2`
+Depends on: REA-7
 
-**Description**:
-Build the variant selection component with availability logic.
-
-**Acceptance Criteria**:
-- [ ] `src/utils/availability.ts` - findVariantByOptions, isVariantPurchasable, getOptionAvailability, getDefaultSelections
-- [ ] `src/hooks/useVariantSelection.ts` - State machine for variant selection
-- [ ] `src/components/VariantSelector.tsx` - Option pills with selected/unavailable states
-- [ ] Cross-option availability checking (e.g., selecting Black shows which sizes are available)
-- [ ] Accessibility: radio group semantics, unavailable state announced
-- [ ] Unit tests for availability utilities and VariantSelector
-
-**Branch**: `feature/TICKET-011-variant-selector`
+Badge (numeric count, 99+ cap), PriceDisplay (current + compare-at with sale styling), QuantityStepper (inc/dec, trash icon at qty=1), ImageCarousel (horizontal pager with counter + thumbnail strip). All accessible.
 
 ---
 
-## Epic: Screens
+### REA-15: Variant Selector
+**P1 · Feature · 2pt · ✅ Done**
+Branch: `dnlamah1/rea-15-ticket-011-variant-selector-component`
+Depends on: REA-6, REA-7
 
-### TICKET-012: Product List Screen
-**Type**: Feature  
-**Priority**: P0 - Blocker  
-**Estimated**: 1.5 days
+Availability utilities (findVariantByOptions, getOptionAvailability, getDefaultSelections), `useVariantSelection` hook, `VariantSelector` component with radio-group pills. Cross-option availability checking — selecting Black shows which Sizes are still purchasable.
 
-**Description**:
-Build the main product catalog screen with grid layout and state handling.
-
-**Acceptance Criteria**:
-- [ ] `src/screens/ProductListScreen.tsx`
-- [ ] 2-column FlatList grid with ProductCard items
-- [ ] Pull-to-refresh functionality
-- [ ] Loading skeleton on initial load
-- [ ] Error state with retry button
-- [ ] Empty state when no products
-- [ ] Offline banner integration
-- [ ] Navigation to ProductDetail on card press
-- [ ] FlatList performance optimizations (keyExtractor, getItemLayout, windowSize)
-- [ ] Accessibility: list semantics, card labels
-
-**Branch**: `feature/TICKET-012-product-list-screen`
+- [x] Availability utils + tests
+- [x] Hook with full selection state machine
+- [x] Pill UI with selected/unavailable states
+- [x] a11y: radio group semantics
 
 ---
 
-### TICKET-013: Product Detail Screen
-**Type**: Feature  
-**Priority**: P0 - Blocker  
-**Estimated**: 1.5 days
+## Phase 4 — Screens
 
-**Description**:
-Build the product detail screen with variant selection and add-to-cart functionality.
+### REA-22: App Entry Point
+**P0 · Feature · 1pt · ✅ Done**
+Branch: `dnlamah1/rea-22-ticket-018-app-entry-point-error-boundary`
+Depends on: REA-8, REA-13
 
-**Acceptance Criteria**:
-- [ ] `src/screens/ProductDetailScreen.tsx`
-- [ ] Image carousel with pagination
-- [ ] Product title, vendor, description
-- [ ] Variant selector integration
-- [ ] Price display with sale indicator
-- [ ] "Add to Cart" button with state-dependent text ("Add to Cart" / "Added!" / "Unavailable")
-- [ ] Button disabled when variant unavailable
-- [ ] Cart quantity indicator if item already in cart
-- [ ] Accessibility: all interactive elements labeled, price announced in natural language
-
-**Branch**: `feature/TICKET-013-product-detail-screen`
+App.tsx with SafeAreaProvider, ErrorBoundary, RootNavigator. Launches clean on both platforms.
 
 ---
 
-### TICKET-014: Cart Screen
-**Type**: Feature  
-**Priority**: P0 - Blocker  
-**Estimated**: 1.5 days
+### REA-16: Product List Screen
+**P0 · Feature · 3pt · ✅ Done**
+Branch: `dnlamah1/rea-16-ticket-012-product-list-screen`
+Depends on: REA-8, REA-10, REA-12, REA-13
 
-**Description**:
-Build the cart screen with line items, quantity management, and summary.
-
-**Acceptance Criteria**:
-- [ ] `src/screens/CartScreen.tsx`
-- [ ] FlatList of CartLineItem components
-- [ ] Each line item shows: image, title, variant, price, quantity stepper
-- [ ] Swipe-to-delete or remove button
-- [ ] Cart summary: subtotal, total items count
-- [ ] Empty cart state with "Browse Products" CTA
-- [ ] Navigation to ProductDetail when tapping line item
-- [ ] Accessibility: quantity changes announced, totals labeled
-
-**Branch**: `feature/TICKET-014-cart-screen`
+2-column FlashList grid with ProductCard tiles. Pull-to-refresh, skeleton on initial load, error state with retry, empty state, offline banner. Navigation to ProductDetail on card tap. Performance-tuned with keyExtractor and stable renderItem callbacks.
 
 ---
 
-## Epic: Quality & Polish
+### REA-17: Product Detail Screen
+**P0 · Feature · 3pt · ✅ Done**
+Branch: `dnlamah1/rea-17-ticket-013-product-detail-screen`
+Depends on: REA-8, REA-10, REA-11, REA-14, REA-15
 
-### TICKET-015: Accessibility Audit & Improvements
-**Type**: Enhancement  
-**Priority**: P1 - High  
-**Estimated**: 1 day
-
-**Description**:
-Comprehensive accessibility audit and improvements for VoiceOver/TalkBack.
-
-**Acceptance Criteria**:
-- [ ] All interactive elements have accessibilityRole
-- [ ] All buttons/pressables have accessibilityLabel
-- [ ] Form controls have accessibilityState (selected, disabled, checked)
-- [ ] Price announcements in natural language ("28 dollars and 96 cents")
-- [ ] Cart updates announced via AccessibilityInfo.announceForAccessibility
-- [ ] Tab navigation works correctly with screen readers
-- [ ] Manual testing with VoiceOver (iOS) and TalkBack (Android)
-
-**Branch**: `feature/TICKET-015-accessibility`
+Image carousel, product info (vendor, title, description, tags), variant selector, price with sale indicator, sticky "Add to Cart" button. Button state reflects selection state (add / unavailable / select options). Cart quantity shown if item already in cart. Full a11y — prices read in natural language.
 
 ---
 
-### TICKET-016: Unit Tests
-**Type**: Testing  
-**Priority**: P1 - High  
-**Estimated**: 1 day
+### REA-18: Cart Screen
+**P0 · Feature · 3pt · ✅ Done**
+Branch: `dnlamah1/rea-18-ticket-014-cart-screen`
+Depends on: REA-8, REA-11, REA-14
 
-**Description**:
-Write unit tests for stores, utilities, and key components.
-
-**Acceptance Criteria**:
-- [ ] Jest and @testing-library/react-native configured
-- [ ] cartStore tests: addItem, removeItem, updateQuantity, clearCart, selectors
-- [ ] productStore tests: hydrateFromCache, fetchProducts, getProductById
-- [ ] currency utility tests: parseMoney, formatPrice, formatPriceForVoiceOver, isOnSale
-- [ ] availability utility tests: findVariantByOptions, getOptionAvailability, getDefaultSelections
-- [ ] VariantSelector component tests: rendering, interactions
-- [ ] All tests pass with `npm test`
-- [ ] Coverage report generated
-
-**Branch**: `feature/TICKET-016-unit-tests`
+FlashList of CartLineItem rows (thumbnail, title, variant, price, quantity stepper). Sticky bottom summary with subtotal + checkout. Empty state with "Browse Products" CTA. Quantity changes announced to assistive tech.
 
 ---
 
-### TICKET-017: Documentation
-**Type**: Documentation  
-**Priority**: P2 - Medium  
-**Estimated**: 0.5 days
+## Phase 5 — Polish
 
-**Description**:
-Write project documentation including setup instructions and architecture overview.
+### REA-19: Accessibility Audit
+**P1 · Enhancement · 2pt · ✅ Done**
+Branch: `dnlamah1/rea-19-ticket-015-accessibility-audit-improvements`
+Depends on: REA-16, REA-17, REA-18
 
-**Acceptance Criteria**:
-- [ ] README.md with:
-  - Project overview and features
-  - Architecture diagram
-  - Project structure
-  - Setup instructions (prerequisites, installation, running)
-  - Testing instructions
-  - Technical constraints met
-  - Tradeoffs and limitations
-- [ ] DECISION_LOG.md with key architectural decisions and rationale
+Comprehensive pass: accessibilityRole on all interactives, accessibilityState for selected/disabled, natural-language price announcements, cart mutation announcements, tab navigation verified with screen readers.
 
-**Branch**: `feature/TICKET-017-documentation`
+Tested with VoiceOver (iOS) and TalkBack (Android).
 
 ---
 
-## Epic: App Shell
+### REA-20: Unit Tests
+**P1 · Testing · 2pt · ✅ Done**
+Branch: `dnlamah1/rea-20-ticket-016-unit-tests`
+Depends on: REA-10, REA-11, REA-15
 
-### TICKET-018: App Entry Point & Error Boundary
-**Type**: Feature  
-**Priority**: P0 - Blocker  
-**Estimated**: 0.5 days
+Jest + @testing-library/react-native. Tests for both stores (actions, selectors, edge cases), all utility functions (currency, availability, retry, storage, image), key components (interactions, a11y labels, conditional rendering), hooks, and screens.
 
-**Description**:
-Set up the app entry point with providers and error handling.
+All tests pass via `npm test`.
 
-**Acceptance Criteria**:
-- [ ] App.tsx configured with SafeAreaProvider
-- [ ] ErrorBoundary wrapping the app
-- [ ] RootNavigator as main content
-- [ ] App launches without errors on iOS and Android
+---
 
-**Branch**: `feature/TICKET-018-app-shell`
+### REA-21: Documentation
+**P2 · Docs · 1pt · ✅ Done**
+Branch: `dnlamah1/rea-21-ticket-017-documentation`
+Depends on: everything
+
+README with project overview, architecture diagram, setup instructions, testing instructions, constraints, tradeoffs. DECISION_LOG with architectural rationale.
+
+---
+
+## Post-MVP
+
+### REA-23: Pull-to-Refresh on Product Catalog
+**Medium · Enhancement · ✅ Done**
+Branch: `dnlamah1/rea-23-implement-pull-to-refresh-on-product-catalog`
+
+Pull-to-refresh gesture on the product list. Resets pagination to page 1 on refresh. Already wired via RefreshControl on FlashList + `useProducts.handleRefresh`. Would add a brief auto-dismiss toast for success/failure feedback as a follow-up.
+
+---
+
+### REA-24: Enhance OfflineBanner
+**Medium · Enhancement · Backlog**
+Branch: `dnlamah1/rea-24-enhance-offlinebanner-with-icon-animation-and-dismiss-action`
+
+Current banner is a static orange bar. Improvements:
+- WifiOff icon
+- Slide-in/out animations on connectivity change
+- Secondary "Showing cached data" text
+- Dismiss button
+- a11y announcements on connectivity change
+
+---
+
+### REA-25: Card Grid Spacing
+**Medium · Enhancement · ✅ Done**
+Branch: `dnlamah1/rea-25-add-spacing-between-product-cards-in-grid`
+
+Product cards had no gaps. Added consistent row/column spacing, adjusted card width calc to account for gaps. No visual regression on badges or content.
+
+---
+
+### REA-26: Responsive Price Sizing
+**Medium · Enhancement · ✅ Done**
+Branch: `dnlamah1/rea-26-responsive-price-font-sizing-for-iphone-and-ipad`
+
+Price text was too large on iPhone (crowded) and too small on iPad. Added responsive font sizing based on device form factor. Applied to both ProductCard and PriceDisplay.
 
 ---
 
 ## Summary
 
-| Ticket | Title | Priority | Estimate | Dependencies |
-|--------|-------|----------|----------|--------------|
-| TICKET-001 | Project Initialization | P0 | 0.5d | - |
-| TICKET-002 | Domain Types | P0 | 0.5d | TICKET-001 |
-| TICKET-003 | Theme System | P0 | 0.5d | TICKET-001 |
-| TICKET-004 | Navigation | P0 | 1d | TICKET-001, TICKET-002 |
-| TICKET-005 | API Layer | P0 | 1d | TICKET-001, TICKET-002 |
-| TICKET-006 | Product Store | P0 | 1d | TICKET-005 |
-| TICKET-007 | Cart Store | P0 | 1d | TICKET-002 |
-| TICKET-008 | Network Status | P1 | 0.5d | TICKET-001 |
-| TICKET-009 | Shared Components 1 | P1 | 1d | TICKET-003 |
-| TICKET-010 | Shared Components 2 | P1 | 1d | TICKET-003 |
-| TICKET-011 | Variant Selector | P1 | 1d | TICKET-002, TICKET-003 |
-| TICKET-012 | Product List Screen | P0 | 1.5d | TICKET-004, TICKET-006, TICKET-008, TICKET-009 |
-| TICKET-013 | Product Detail Screen | P0 | 1.5d | TICKET-004, TICKET-006, TICKET-007, TICKET-010, TICKET-011 |
-| TICKET-014 | Cart Screen | P0 | 1.5d | TICKET-004, TICKET-007, TICKET-010 |
-| TICKET-015 | Accessibility | P1 | 1d | TICKET-012, TICKET-013, TICKET-014 |
-| TICKET-016 | Unit Tests | P1 | 1d | TICKET-006, TICKET-007, TICKET-011 |
-| TICKET-017 | Documentation | P2 | 0.5d | All |
-| TICKET-018 | App Shell | P0 | 0.5d | TICKET-004, TICKET-009 |
+| ID | Title | Priority | Phase | Status |
+|----|-------|----------|-------|--------|
+| REA-5 | Project Init | P0 | Foundation | Done |
+| REA-6 | Domain Types | P0 | Foundation | Done |
+| REA-7 | Theme System | P0 | Foundation | Done |
+| REA-8 | Navigation | P0 | Infrastructure | Done |
+| REA-9 | API + Caching | P0 | Infrastructure | Done |
+| REA-10 | Product Store | P0 | Infrastructure | Done |
+| REA-11 | Cart Store | P0 | Infrastructure | Done |
+| REA-12 | Network Status | P1 | Components | Done |
+| REA-13 | Shared UI (Part 1) | P1 | Components | Done |
+| REA-14 | Shared UI (Part 2) | P1 | Components | Done |
+| REA-15 | Variant Selector | P1 | Components | Done |
+| REA-22 | App Entry Point | P0 | Screens | Done |
+| REA-16 | Product List Screen | P0 | Screens | Done |
+| REA-17 | Product Detail Screen | P0 | Screens | Done |
+| REA-18 | Cart Screen | P0 | Screens | Done |
+| REA-19 | Accessibility Audit | P1 | Polish | Done |
+| REA-20 | Unit Tests | P1 | Polish | Done |
+| REA-21 | Documentation | P2 | Polish | Done |
+| REA-23 | Pull-to-Refresh | Med | Post-MVP | Done |
+| REA-24 | OfflineBanner Polish | Med | Post-MVP | Backlog |
+| REA-25 | Card Grid Spacing | Med | Post-MVP | Done |
+| REA-26 | Responsive Pricing | Med | Post-MVP | Done |
 
-**Total Estimated Effort**: ~16 days
+**Total**: 34 story points (MVP) · 21/22 tickets done · 1 backlogged
 
 ---
 
-## Suggested Implementation Order
+## Dependency Graph
 
-### Phase 1: Foundation (Days 1-2)
-1. TICKET-001: Project Initialization
-2. TICKET-002: Domain Types
-3. TICKET-003: Theme System
+```
+Foundation
+  REA-5 → REA-6 → REA-9 → REA-10
+                 → REA-11
+                 → REA-15
+         → REA-7 → REA-13, REA-14
+         → REA-12
 
-### Phase 2: Infrastructure (Days 3-5)
-4. TICKET-004: Navigation
-5. TICKET-005: API Layer
-6. TICKET-006: Product Store
-7. TICKET-007: Cart Store
+Infrastructure
+  REA-5, REA-6 → REA-8
 
-### Phase 3: Components (Days 6-8)
-8. TICKET-008: Network Status
-9. TICKET-009: Shared Components 1
-10. TICKET-010: Shared Components 2
-11. TICKET-011: Variant Selector
+Screens
+  REA-8 + REA-13 → REA-22
+  REA-8 + REA-10 + REA-12 + REA-13 → REA-16
+  REA-8 + REA-10 + REA-11 + REA-14 + REA-15 → REA-17
+  REA-8 + REA-11 + REA-14 → REA-18
 
-### Phase 4: Screens (Days 9-12)
-12. TICKET-018: App Shell
-13. TICKET-012: Product List Screen
-14. TICKET-013: Product Detail Screen
-15. TICKET-014: Cart Screen
-
-### Phase 5: Polish (Days 13-16)
-16. TICKET-015: Accessibility
-17. TICKET-016: Unit Tests
-18. TICKET-017: Documentation
+Polish
+  REA-16 + REA-17 + REA-18 → REA-19
+  REA-10 + REA-11 + REA-15 → REA-20
+  Everything → REA-21
+```

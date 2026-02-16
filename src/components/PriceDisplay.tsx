@@ -1,9 +1,3 @@
-/**
- * PriceDisplay Component
- *
- * Displays price with optional compare-at price for sales.
- */
-
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import type {Money} from '@apptypes/product';
@@ -22,8 +16,6 @@ export function PriceDisplay({
   size = 'default',
 }: PriceDisplayProps) {
   const onSale = isOnSale(compareAtPrice, price);
-
-  // Build accessibility label
   const discountPct = onSale
     ? calculateDiscountPercentage(compareAtPrice!, price)
     : 0;

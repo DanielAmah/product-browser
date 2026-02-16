@@ -15,6 +15,7 @@ module.exports = {
     ')/)',
   ],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/src/__tests__/helpers/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@api/(.*)$': '<rootDir>/src/api/$1',

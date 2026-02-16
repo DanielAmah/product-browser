@@ -1,9 +1,3 @@
-/**
- * Theme barrel export
- *
- * Re-exports all theme tokens for convenient imports.
- */
-
 export {colors} from './colors';
 export type {ColorToken} from './colors';
 

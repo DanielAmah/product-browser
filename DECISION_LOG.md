@@ -1,196 +1,80 @@
 # Decision Log
 
-I'm documenting the key architectural and implementation decisions I made during development, including the context, alternatives I considered, and my rationale.
+Key architectural and implementation decisions I made during the build, with context and rationale.
 
 ---
 
-## 1. State Management: Zustand over Redux/Context
+## 1. Zustand over Redux / Context
 
-**Date**: 2026-02-14  
-**Status**: Accepted
+I needed state management for products and cart, with persistence. Considered Redux Toolkit (great DevTools, but way too much ceremony for an app this size), plain Context + useReducer (no persistence story), and Zustand.
 
-### Context
-I needed predictable state management for products and cart with persistence capabilities.
+Went with **Zustand**:
+- Tiny API surface — no action creators, no providers, no reducers
+- Built-in `persist` middleware that wraps AsyncStorage out of the box
+- Full TypeScript inference without extra type plumbing
+- Dead simple to test — `create()` a fresh store per test
+- ~1KB gzipped
 
-### Options I Considered
-1. **Redux Toolkit** - Industry standard, excellent DevTools
-2. **React Context + useReducer** - Built-in, no dependencies
-3. **Zustand** - Minimal API, built-in persistence
-4. **Jotai/Recoil** - Atomic state model
-
-### Decision
-I chose **Zustand** for the following reasons:
-
-- **Minimal boilerplate**: I didn't need action creators, reducers, or providers
-- **Built-in persist middleware**: First-class AsyncStorage integration out of the box
-- **Excellent TypeScript support**: Full type inference without extra wiring
-- **Testability**: I can reset stores and test them in isolation
-- **Small bundle size**: ~1KB gzipped — keeps the app lean
-
-### Consequences
-- Less ecosystem tooling compared to Redux
-- Team members familiar with Redux may need a bit of adjustment
-- Works well for this app's scale; I'd reconsider for a significantly larger app
+**Tradeoffs:** less ecosystem tooling than Redux, and anyone used to Redux patterns will need to adjust. Fine at this scale; I'd revisit for a much larger app.
 
 ---
 
-## 2. Navigation: React Navigation v7
+## 2. React Navigation v7
 
-**Date**: 2026-02-14  
-**Status**: Accepted
+Went with `@react-navigation/native` + `@react-navigation/bottom-tabs` + `@react-navigation/native-stack`. The native-stack variant gives us native UINavigationController on iOS for better perf.
 
-### Context
-I needed type-safe navigation between screens with bottom tabs and stack navigation.
+Type safety was the main focus. Centralized all param lists in `navigation/types.ts` with `CompositeScreenProps` for screens that need both stack and tab navigation. Every `navigation.navigate()` call is compile-time checked.
 
-### Decision
-I went with **React Navigation** using:
-- `@react-navigation/native` - Core navigation
-- `@react-navigation/bottom-tabs` - Tab navigator
-- `@react-navigation/native-stack` - Native stack for performance
-
-### Type Safety Implementation
-```typescript
-// Centralized param list types
-export type ProductsStackParamList = {
-  ProductList: undefined;
-  ProductDetail: {productId: string};
-};
-
-// Composite screen props for nested navigators
-export type ProductDetailScreenProps = CompositeScreenProps<
-  NativeStackScreenProps<ProductsStackParamList, 'ProductDetail'>,
-  BottomTabScreenProps<RootTabParamList>
->;
-```
-
-### Consequences
-- I get full compile-time type checking for navigation
-- Autocomplete for route names and params
-- It does require careful type setup for nested navigators, but the safety is worth it
+The type setup for nested navigators is verbose, but catching route bugs at compile time is worth it.
 
 ---
 
-## 3. Image Loading: Native Image vs react-native-fast-image
+## 3. Native Image instead of react-native-fast-image
 
-**Date**: 2026-02-14  
-**Status**: Accepted (with tradeoff)
+Ran into a peer dependency wall:
 
-### Context
-I needed efficient image loading with caching for offline support.
-
-### Issue I Encountered
 ```
 npm error code ERESOLVE
 react-native-fast-image@8.6.3 requires react@"^17 || ^18"
-Project uses react@19.2.3
 ```
 
-### Decision
-I decided to **omit react-native-fast-image** and use the native `Image` component instead.
+RN 0.84 ships React 19 and fast-image hasn't caught up. Decided to move forward with the native `Image` component rather than block on it. Recent RN versions have improved `Image` significantly, and HTTP cache headers give us basic caching.
 
-### My Rationale
-1. React Native 0.84 ships with React 19
-2. react-native-fast-image hasn't been updated for React 19 compatibility
-3. The native `Image` component has improved significantly in recent RN versions
-4. Blocking on this dependency would have delayed the entire project
-
-### Mitigation
-- Native `Image` provides basic caching via HTTP cache headers
-- For production, I'd consider:
-  - Waiting for react-native-fast-image React 19 support
-  - Using `expo-image` (if Expo becomes acceptable)
-  - Implementing a custom native image caching module
-
-### Consequences
-- Slightly less optimal image caching
-- No progressive loading or priority queue
-- Acceptable for this assessment's scope
+For production, I'd watch for fast-image React 19 support, or look at `expo-image` if Expo becomes acceptable. Could also write a thin native module for disk caching if needed.
 
 ---
 
-## 4. Caching Strategy: Stale-While-Revalidate
+## 4. Stale-While-Revalidate caching
 
-**Date**: 2026-02-14  
-**Status**: Accepted
+The app needs to work offline with whatever we last loaded. I went with stale-while-revalidate:
 
-### Context
-The app must work offline with the most recently loaded catalog.
+1. On launch, hydrate from AsyncStorage immediately — user sees cached products instantly
+2. Fire off a network fetch in the background
+3. If fetch succeeds, swap in fresh data and update the cache
+4. If fetch fails and we have cached data, just keep showing it
 
-### Decision
-I implemented a **stale-while-revalidate** pattern:
-
-```typescript
-// 1. Show cached data immediately
-const cached = await readProductsCache();
-if (cached) {
-  set({products: cached.data, fetchState: 'success'});
-}
-
-// 2. Fetch fresh data in background
-const fresh = await fetchProducts();
-set({products: fresh, fetchState: 'success'});
-writeProductsCache(fresh);
-```
-
-### Benefits
-- Instant UI with cached data — the user never stares at a blank screen
-- Background refresh keeps things fresh
-- Graceful offline degradation
-
-### Consequences
-- Users may briefly see stale data
-- I'd need to handle cache invalidation for significant catalog changes
+This means users might briefly see stale prices, but they never stare at a blank screen. For a real product catalog I'd add cache invalidation on significant changes, but this is fine for the assessment scope.
 
 ---
 
-## 5. Cart Item Denormalization
+## 5. Denormalized cart items
 
-**Date**: 2026-02-14  
-**Status**: Accepted
+Cart items store a snapshot of price, title, variant info, and image at the time of add. They don't reference the product store.
 
-### Context
-Cart items reference products that may change (price updates, availability).
+Why:
+- **Price consistency** — user sees the price they agreed to, not one that silently changed
+- **Offline resilience** — cart works without needing products loaded
+- **Audit trail** — clear record of what was added and at what price
 
-### Decision
-I chose to store **denormalized snapshots** in the cart:
-
-```typescript
-interface CartItem {
-  variantId: string;
-  productId: string;
-  title: string;           // Snapshot at add time
-  variantTitle: string;    // Snapshot at add time
-  price: Money;            // Snapshot at add time
-  quantity: number;
-  image: MediaImage | null;
-}
-```
-
-### My Rationale
-- **Price consistency**: The user sees the price they agreed to when they added the item
-- **Offline resilience**: The cart works without needing the product data available
-- **Audit trail**: Clear record of what was added and at what price
-
-### Tradeoffs
-- Cart items won't reflect subsequent product updates
-- Slightly larger storage footprint
-- I consider this acceptable for standard e-commerce cart semantics
+The downside is cart items won't reflect subsequent product updates (e.g. if a price drops). In production I'd reconcile on checkout, but for cart-display purposes this is standard e-commerce semantics.
 
 ---
 
-## 6. Variant Selection Algorithm
+## 6. Variant selection algorithm
 
-**Date**: 2026-02-14  
-**Status**: Accepted
-
-### Context
-Products have multiple option axes (Color, Size) with variant availability constraints.
-
-### Decision
-I implemented cross-option availability checking:
+Products have multiple option axes (Color, Size). When a user picks Black, I need to show which Sizes are still available in Black.
 
 ```typescript
-// For each option, check what values are available given other selections
 function getOptionAvailability(
   variants: Variant[],
   options: ProductOption[],
@@ -198,350 +82,142 @@ function getOptionAvailability(
 ): Record<string, Record<string, boolean>>
 ```
 
-### Algorithm
-1. For each option axis (e.g., Size)
-2. For each value in that axis (e.g., S, M, L)
-3. I check if any variant exists with:
-   - That value selected
-   - All other current selections
-   - `availableForSale === true`
-
-### Consequences
-- O(options × values × variants) complexity
-- Perfectly acceptable for typical product variant counts (<100)
-- I could optimize with a pre-computed availability matrix if needed down the road
+For each option axis, for each value, check if any variant exists with that value + the other current selections + `availableForSale === true`. O(options × values × variants) — perfectly fine for typical product variant counts. Could pre-compute an availability matrix if this ever needs to handle hundreds of variants.
 
 ---
 
-## 7. FetchState as Discriminated Union
+## 7. FetchState discriminated union
 
-**Date**: 2026-02-14  
-**Status**: Accepted
-
-### Context
-I needed to represent loading states without allowing impossible combinations.
-
-### Decision
-I used a **discriminated union** instead of boolean flags:
+Instead of the classic `{ isLoading, isError, isSuccess }` boolean soup (which allows impossible states like `isLoading && isError`), I used a string union:
 
 ```typescript
-// Instead of:
-interface State {
-  isLoading: boolean;
-  isError: boolean;
-  isSuccess: boolean;
-}
-
-// I use:
 type FetchState = 'idle' | 'loading' | 'refreshing' | 'success' | 'error';
 ```
 
-### Benefits
-- **Type safety**: Can't be loading AND error simultaneously
-- **Exhaustive checks**: TypeScript ensures I handle all states
-- **Clear semantics**: The `refreshing` vs `loading` distinction lets me show cached data during a background refresh
+The `refreshing` vs `loading` distinction is the key win — it lets me show cached data with a background spinner vs. a full-screen skeleton. TypeScript enforces exhaustive handling.
 
 ---
 
-## 8. Path Alias: @apptypes instead of @types
+## 8. @apptypes alias (not @types)
 
-**Date**: 2026-02-14  
-**Status**: Accepted
+Tried `@types/*` as a path alias for `src/types/*` and immediately hit:
 
-### Context
-I wanted TypeScript path aliases for cleaner imports.
-
-### Issue I Encountered
 ```
 TS6137: Cannot import type declaration files.
-Consider importing 'product' instead of '@types/product'.
 ```
 
-### Root Cause
-`@types` conflicts with TypeScript's built-in type resolution for DefinitelyTyped packages.
-
-### Decision
-I renamed the alias from `@types` to `@apptypes`:
-
-```json
-{
-  "paths": {
-    "@apptypes/*": ["src/types/*"]
-  }
-}
-```
-
-### Consequences
-- Slightly less intuitive naming
-- Avoids the TypeScript resolution conflict entirely
-- Consistent with the principle of avoiding reserved namespaces
+`@types` collides with TypeScript's built-in DefinitelyTyped resolution. Renamed to `@apptypes` — slightly less obvious, but avoids the namespace collision entirely.
 
 ---
 
-## 9. Testing Strategy
+## 9. Testing strategy
 
-**Date**: 2026-02-14  
-**Status**: Accepted
+Focused on unit tests for the areas with the most logic density:
+- Zustand stores (cart + product) — state transitions, selectors, edge cases
+- Utility functions (currency, availability, retry) — pure functions, easy to cover exhaustively
+- Key components — interactions, a11y labels, conditional rendering
 
-### Context
-I needed testable code with reasonable coverage for the assessment.
+Skipped snapshot tests (brittle during rapid iteration), E2E (Detox setup was out of scope), and integration tests (covered by manual testing for now).
 
-### Decision
-I focused on **unit tests** for:
-- Zustand stores (cartStore, productStore)
-- Utility functions (currency, availability)
-- Key components (VariantSelector)
-
-### Tools
-- Jest (built-in with React Native)
-- @testing-library/react-native
-
-### What I Didn't Include
-- E2E tests (Detox) — requires additional setup beyond the assessment scope
-- Snapshot tests — I find them brittle for rapid iteration
-- Integration tests — covered by manual testing for now
-
-### Coverage Achieved
-- Stores: ~90%+ coverage
-- Utilities: 100% coverage
-- Components: Key interactions tested
+Tools: Jest + @testing-library/react-native. Coverage: stores and utils at 90%+, components tested for key interactions.
 
 ---
 
-## 10. Accessibility Implementation
+## 10. Accessibility approach
 
-**Date**: 2026-02-14  
-**Status**: Accepted
+All interactive elements get `accessibilityRole`. All buttons and pressables get `accessibilityLabel`. Form controls (variant pills) use `accessibilityState` for selected/disabled. Prices read as natural language ("28 dollars and 96 cents Canadian") via a dedicated `formatPriceForVoiceOver` function. Cart mutations trigger `AccessibilityInfo.announceForAccessibility`.
 
-### Context
-The app must support VoiceOver (iOS) and TalkBack (Android).
-
-### My Implementation
-1. **Semantic roles**: I set `accessibilityRole` on all interactive elements
-2. **State announcements**: `accessibilityState` for selected/disabled states
-3. **Labels**: `accessibilityLabel` for non-text content like images and icons
-4. **Live announcements**: `AccessibilityInfo.announceForAccessibility` for cart updates
-
-### Example
-```tsx
-<Pressable
-  accessibilityRole="radio"
-  accessibilityState={{
-    selected: isSelected,
-    disabled: !isAvailable,
-  }}
-  accessibilityLabel={`${value}${!isAvailable ? ', unavailable' : ''}`}
->
-```
-
-### Consequences
-- Fully navigable with screen readers
-- Price announcements in natural language ("28 dollars and 96 cents")
-- Cart updates announced to assistive technology
+Tested with VoiceOver on iOS and TalkBack on Android.
 
 ---
 
-## 11. List Performance: FlashList over FlatList
+## 11. FlashList over FlatList
 
-**Date**: 2026-02-15  
-**Status**: Accepted
+Migrated both `ProductListScreen` and `CartScreen` to `@shopify/flash-list` v2.
 
-### Context
-The product grid and cart list need smooth scrolling, especially as the catalog grows.
+FlashList reuses native views via cell recycling instead of creating/destroying them, cutting JS-to-native bridge traffic. Shopify benchmarks show up to 5x improvement for large lists. The API is nearly identical to FlatList, so migration was minimal.
 
-### Options I Considered
-1. **FlatList** - Built-in React Native list, cell-based virtualisation
-2. **@shopify/flash-list** - RecyclerView-backed list with cell recycling
+Migration notes:
+- `columnWrapperStyle` isn't supported — I handle column gap via card-level margins
+- `contentContainerStyle` takes a plain object, not a StyleSheet ref
+- `removeClippedSubviews`, `maxToRenderPerBatch`, `windowSize` — all gone, FlashList manages draw distance internally
 
-### Decision
-I migrated both `ProductListScreen` and `CartScreen` from `FlatList` to **@shopify/flash-list v2**.
-
-### My Rationale
-- **Cell recycling**: FlashList reuses native views instead of creating/destroying them, reducing JS ↔ native bridge traffic
-- **Faster mount times**: Shopify's benchmarks show up to 5× improvement for large lists
-- **Drop-in API**: Props are nearly identical to FlatList, so the migration effort was minimal
-- **v2 simplifications**: `estimatedItemSize` was removed; the new architecture handles layout measurement automatically
-
-### Migration Notes
-- `columnWrapperStyle` isn't supported in FlashList; I handle column gap via card-level margins instead
-- `contentContainerStyle` accepts a plain object (not a `StyleSheet` reference)
-- `removeClippedSubviews`, `maxToRenderPerBatch`, and `windowSize` are no longer needed — FlashList manages draw distance via its own `drawDistance` prop
-
-### Consequences
-- Requires a native rebuild after install (`pod install`)
-- Slightly different scroll-physics tuning than FlatList
-- Gives me significant performance headroom for larger catalogs
+Requires a native rebuild after install. Gives me real performance headroom when the catalog grows.
 
 ---
 
-## 12. Screen Refactoring: Component Extraction & Custom Hooks
+## 12. Screen-as-orchestrator refactoring
 
-**Date**: 2026-02-15  
-**Status**: Accepted
-
-### Context
-My three main screens (`ProductListScreen`, `CartScreen`, `ProductDetailScreen`) were 350–385 lines each, mixing data fetching, business logic, UI rendering, and styles in a single file. I wanted to break them down for clarity and testability.
-
-### Decision
-I applied a **screen-as-orchestrator** pattern:
+My three main screens were 350-380 lines each, mixing data fetching, business logic, and UI. Broke them down:
 
 | Layer | Responsibility | Examples |
 |-------|---------------|----------|
-| **Hooks** | Data fetching, state, actions | `useProducts`, `useCart`, `useAddToCart` |
-| **Components** | Pure UI with props | `ProductCard`, `CartLineItem`, `CartSummary`, `ProductInfo`, `AddToCartButton` |
-| **Screens** | Compose hooks + components, handle navigation | `ProductListScreen` (163 lines), `CartScreen` (98 lines) |
+| **Hooks** | Data, state, actions | `useProducts`, `useCart`, `useAddToCart` |
+| **Components** | Pure UI with props | `ProductCard`, `CartLineItem`, `CartSummary` |
+| **Screens** | Compose hooks + components, handle navigation | `ProductListScreen` (~160 lines) |
 
-### Hooks I Extracted
-- `useProducts` — hydration, fetch, client-side pagination, refresh
-- `useCart` — cart selectors, actions, formatted totals
-- `useAddToCart` — add-to-cart logic, button state, accessibility labels
-
-### Components I Extracted
-- `ProductCard` — grid tile with image, vendor, title, price, sale badge
-- `CartLineItem` — cart row with thumbnail, quantity stepper, line total
-- `CartSummary` — sticky bottom panel with subtotal, total, checkout button
-- `ProductInfo` — vendor, title, price, variants, description, tags
-- `AddToCartButton` — sticky bottom CTA with icon and disabled states
-
-### My Rationale
-- **Single Responsibility**: Each file has one reason to change
-- **Testability**: I can test hooks without rendering and components with shallow props
-- **Reusability**: `AddToCartButton` and `CartSummary` are ready to reuse across future screens
-- **Readability**: Screens now read as a clean, declarative composition
-
-### Consequences
-- More files to navigate (I mitigated this with barrel exports)
-- Some prop-drilling in a few places (acceptable given the app's scale)
-- Screens dropped from ~370 lines to ~100–160 lines each
+Screens dropped from ~370 to ~100-160 lines. Hooks are testable without rendering. Components are testable with shallow props. More files to navigate, but barrel exports keep imports clean.
 
 ---
 
-## 13. Shopify CDN Image URL Transformation
+## 13. Shopify CDN image URL transformation
 
-**Date**: 2026-02-15  
-**Status**: Accepted
+Product images from the API embed `_1180x400` in the filename — a Shopify CDN resize parameter that serves landscape crops. Product photos are actually square (confirmed in `media` metadata: 2048×2048 / 5000×5000).
 
-### Context
-I discovered that product images from the API embed a `_1180x400` Shopify CDN resize parameter in the filename. This caused images to be served as landscape crops (2.95:1 ratio), cutting off the top and bottom of product photos when displayed in my square containers.
-
-### Decision
-I created a shared `getSquareImageUrl` utility that replaces the `_WIDTHxHEIGHT` portion of Shopify CDN URLs with a square dimension:
+Built `getSquareImageUrl` to replace the dimension:
 
 ```typescript
-// src/utils/image.ts
 export function getSquareImageUrl(url: string, size = 600): string {
   return url.replace(/_\d+x\d+(?=\.\w+(\?|$))/, `_${size}x${size}`);
 }
 ```
 
-### How I Use It
-- **Grid thumbnails**: `getSquareImageUrl(url)` → `_600x600` (smaller, faster loads)
-- **Detail carousel**: `getSquareImageUrl(url, 1200)` → `_1200x1200` (high-res)
-
-### My Rationale
-- The original source images are actually square (2048×2048 / 5000×5000) per the `media` metadata
-- I confirmed the Shopify CDN accepts modified size parameters via an `HTTP 200` response
-- A shared utility avoids duplicating the regex in `ProductCard` and `ImageCarousel`
-
-### Consequences
-- Relies on Shopify CDN honouring the resize parameter (I confirmed it works)
-- If the URL format changes, I only need to update one utility
-- Smaller square crops reduce bandwidth compared to the original landscape images
+Grid thumbnails get `_600x600` (smaller payloads), detail carousel gets `_1200x1200`. Confirmed the Shopify CDN honours modified parameters via 200 response. Single utility, one place to update if the URL format ever changes.
 
 ---
 
-## 14. Client-Side Pagination Strategy
+## 14. Client-side pagination
 
-**Date**: 2026-02-15  
-**Status**: Accepted
-
-### Context
-The product API returns all items in a single JSON array (static gist). I wanted the architecture to support pagination for when the catalog grows or a paginated API is introduced.
-
-### Decision
-I implemented **client-side pagination** in my `useProducts` hook:
+The API returns everything in one array (static gist). I implemented client-side pagination in `useProducts` anyway:
 
 ```typescript
 const PAGE_SIZE = 10;
-const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
-
-const displayedProducts = useMemo(
-  () => products.slice(0, displayCount),
-  [products, displayCount],
-);
+const displayedProducts = products.slice(0, displayCount);
 ```
 
-### Behaviour
-- First render shows up to `PAGE_SIZE` products
-- `onEndReached` reveals the next page with a 300ms simulated delay (footer spinner)
-- Pull-to-refresh resets to page 1
-- Pagination counter resets when the product array changes (fresh fetch)
+`onEndReached` reveals the next page with a 300ms simulated delay. Pull-to-refresh resets to page 1.
 
-### My Rationale
-- **Future-proof**: Swapping to a server-side paginated API only requires changing the hook internals; the screen and component interfaces stay the same
-- **UX consistency**: Users experience the same infinite-scroll pattern regardless of backend
-- **Performance**: Even with a full local array, rendering only a page at a time keeps initial mount fast
-
-### Tradeoffs
-- The 300ms delay is artificial for a local array, but it provides visual feedback that feels intentional
-- With only 4 products in the current feed, pagination is invisible — but the infrastructure is ready for when it matters
+The 300ms delay is artificial with a local array, but it means swapping to a server-side paginated API later only requires changing the hook internals — the screen interface stays the same. With 4 products in the current feed, pagination is invisible, but the infrastructure is ready.
 
 ---
 
-## 15. How I Used AI
+## 15. How I used AI
 
-**Date**: 2026-02-14 — 2026-02-15  
-**Status**: Documented
+I used AI as a pair-programming tool throughout development. Not a code generator I accepted blindly — every suggestion was reviewed, tested, and often rewritten.
 
-### My Approach
-I used AI as a pair-programming partner throughout this project — not as a code generator I blindly accepted. Every suggestion was reviewed, tested, and often modified before merging.
+**Where it saved time:**
+- Scaffolding repetitive boilerplate (store shapes, nav type definitions, test fixtures)
+- Debugging the iOS `NetworkExtension` linker error and the Podfile `post_install` hook
+- Spotting that the JSON feed was a top-level array instead of `{ products: [] }`
+- Identifying the `_1180x400` Shopify CDN resize parameter
 
-### Where AI Helped Most
-1. **Scaffolding boilerplate**: Initial store shapes, navigation type definitions, and test fixtures. These are high-effort, low-creativity tasks where AI saves real time.
-2. **Debugging iOS build issues**: The `NetworkExtension` linker error and Podfile `post_install` hook — AI helped identify the missing framework and draft the Ruby script to fix corrupted `OTHER_LDFLAGS`.
-3. **API response diagnosis**: When the product list returned empty, AI quickly identified that the JSON feed was a top-level array rather than the expected `{ products: [] }` wrapper.
-4. **Shopify CDN URL analysis**: AI spotted the `_1180x400` resize parameter in image URLs and proposed the `getSquareImageUrl` regex utility.
-5. **Refactoring patterns**: AI suggested the "screen-as-orchestrator" extraction pattern (hooks for logic, components for UI, screens for composition).
+**What I changed or rejected:**
+- AI suggested Redux Toolkit — rejected it for Zustand given the app's scale
+- AI generated snapshot tests — removed them (brittle, low value during rapid iteration)
+- AI proposed react-native-fast-image — rejected due to React 19 peer dep conflict (see #3)
+- AI used `@types` as a path alias — caught the DefinitelyTyped collision, renamed to `@apptypes`
+- AI-generated component code was often too verbose — trimmed and consolidated
 
-### What I Changed or Rejected
-- **AI suggested Redux Toolkit** initially — I rejected this in favour of Zustand given the app's scale and the persistence story.
-- **AI generated snapshot tests** — I removed them because they're brittle during rapid iteration and don't add meaningful confidence for this scope.
-- **AI proposed `react-native-fast-image`** — I rejected it due to a React 19 peer dependency conflict and documented the tradeoff (Decision #3).
-- **AI suggested server-side pagination** — I opted for client-side pagination since the API is a static gist, but I structured the hook so swapping to server-side is a one-file change.
-- **AI initially used `@types` as a path alias** — I caught the DefinitelyTyped conflict and renamed it to `@apptypes` (Decision #8).
-- **AI-generated component code was often too verbose** — I trimmed styles, consolidated similar components, and removed unnecessary abstractions to keep the codebase lean.
-
-### My Rule
-I never committed AI output without understanding it. If I couldn't explain a line during a review, I rewrote it.
+Rule: I never committed output I couldn't explain in a code review.
 
 ---
 
-## 16. What I Would Improve with More Time
+## 16. What I'd improve with more time
 
-**Date**: 2026-02-15  
-**Status**: Documented
+**Performance** — Proper image caching (expo-image or native module) once React 19 compat stabilises. Profile FlashList draw distance with a larger dataset (100+ products). Add shimmer animation to LoadingSkeleton.
 
-### Performance
-- **Image caching**: Integrate a proper image caching library (e.g., `expo-image` or a custom native module) once React 19 compatibility stabilises. The native `Image` component works but lacks progressive loading, priority queues, and disk-level cache control.
-- **Skeleton animations**: Add pulsing/shimmer animation to `LoadingSkeleton` for a more polished loading experience.
-- **List item recycling tuning**: Profile FlashList's `drawDistance` and layout metrics with a larger dataset (100+ products) to fine-tune scroll performance.
+**Testing** — E2E with Detox for critical flows (browse → detail → add → cart). Hook tests with renderHook. Automated a11y audits with jest-axe.
 
-### Testing
-- **E2E tests with Detox**: Cover critical user flows (browse → detail → add to cart → view cart) end-to-end.
-- **Hook tests**: Unit test `useProducts`, `useCart`, and `useAddToCart` with `renderHook` from `@testing-library/react-hooks`.
-- **Integration tests**: Test navigation flows between screens with a mock navigation container.
-- **Accessibility audits**: Automated a11y testing with `jest-axe` or manual screen reader regression tests.
+**UX** — Shared-element transitions between grid and detail screen. Haptic feedback on cart actions. Animated cart badge. Dark mode (theme layer is already structured for it). Toast after pull-to-refresh.
 
-### UX Polish
-- **Animated transitions**: Add shared-element transitions between the product grid and detail screen for visual continuity.
-- **Haptic feedback**: Trigger subtle haptics on add-to-cart and quantity changes using `react-native-haptic-feedback`.
-- **Cart badge animation**: Animate the tab bar badge count when items are added.
-- **Pull-to-refresh feedback**: Add a success/failure toast after a pull-to-refresh completes.
-- **Dark mode**: The theme layer is structured for it — I'd add a dark colour palette and respect `useColorScheme`.
-
-### Architecture
-- **Server-side pagination**: Replace client-side slicing with cursor-based pagination once the API supports it — the `useProducts` hook is already structured for this swap.
-- **Price reconciliation**: On app launch, compare persisted cart prices against current catalog prices and surface a "price changed" warning to the user.
-- **Multi-currency support**: Replace the hardcoded `CAD` formatter with locale-aware currency detection.
-- **Error reporting**: Integrate Sentry for crash and performance monitoring in production.
-- **State persistence versioning**: Expand the migration system in `cartStore.ts` to handle more complex schema evolutions as the cart data model grows.
+**Architecture** — Server-side cursor pagination when the API supports it (useProducts is structured for the swap). Price reconciliation on checkout. Multi-currency support. Sentry integration. Expanded persist migration system for schema evolution.

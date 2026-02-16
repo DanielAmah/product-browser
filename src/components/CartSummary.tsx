@@ -1,9 +1,3 @@
-/**
- * CartSummary Component
- *
- * Sticky bottom panel showing subtotal, total, and checkout button.
- */
-
 import React from 'react';
 import {View, Text, StyleSheet, Pressable, Platform} from 'react-native';
 import {ArrowRight} from 'lucide-react-native';

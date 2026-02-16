@@ -1,10 +1,3 @@
-/**
- * QuantityStepper Component
- *
- * Quantity control with increment/decrement buttons.
- * Shows trash icon when quantity is 1 and decrement is pressed.
- */
-
 import React from 'react';
 import {View, Text, StyleSheet, Pressable} from 'react-native';
 import {Trash2, Minus, Plus} from 'lucide-react-native';

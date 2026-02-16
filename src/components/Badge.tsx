@@ -1,9 +1,3 @@
-/**
- * Badge Component
- *
- * Displays a count badge (e.g., cart item count).
- */
-
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import {colors, textStyles} from '@theme';
@@ -13,12 +7,10 @@ interface BadgeProps {
 }
 
 export function Badge({count}: BadgeProps) {
-  // Don't render if count is 0
   if (count <= 0) {
     return null;
   }
 
-  // Format count (99+ for large numbers)
   const displayCount = count > 99 ? '99+' : String(count);
 
   return (

@@ -1,13 +1,3 @@
-/**
- * ImageCarousel Component
- *
- * Horizontal image pager with counter indicator and thumbnail strip.
- * Borough Kitchen-inspired: clean white background, image counter.
- *
- * Accepts an optional `focusImageId` to smoothly scroll to a specific image
- * (e.g. when the user selects a variant with its own image).
- */
-
 import React, {useState, useCallback, useMemo, useRef, useEffect, memo} from 'react';
 import {
   View,
@@ -109,7 +99,6 @@ export const ImageCarousel = memo(function ImageCarousel({
 
   return (
     <View>
-      {/* Main image */}
       <View style={styles.container}>
         <ScrollView
           ref={scrollRef}
@@ -132,7 +121,6 @@ export const ImageCarousel = memo(function ImageCarousel({
           ))}
         </ScrollView>
 
-        {/* Image counter */}
         {squareImages.length > 1 && (
           <View style={styles.counter}>
             <Text style={styles.counterText}>
@@ -142,7 +130,6 @@ export const ImageCarousel = memo(function ImageCarousel({
         )}
       </View>
 
-      {/* Thumbnail strip */}
       {squareImages.length > 1 && (
         <ScrollView
           horizontal

@@ -1,10 +1,3 @@
-/**
- * useAddToCart Hook
- *
- * Encapsulates add-to-cart logic, button state, and accessibility labels
- * for the ProductDetailScreen.
- */
-
 import {useCallback} from 'react';
 import {AccessibilityInfo} from 'react-native';
 import type {Product, Variant} from '@apptypes/product';
