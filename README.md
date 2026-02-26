@@ -204,7 +204,6 @@ npm test -- --watch
 - Zustand for state management with built-in persistence
 - AsyncStorage for product cache + cart persistence
 - 203 unit tests across 33 suites (Jest + @testing-library/react-native)
-- Full VoiceOver / TalkBack support
 
 ## Tradeoffs & Known Limitations
 
